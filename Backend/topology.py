@@ -6,10 +6,28 @@ import threading
 import time
 import re
 import requests
-from datetime import datetime  # Import datetime module
+from datetime import datetime
+import sqlite3
 
 # Dictionary to store link objects
 links = {}
+
+# SQLite database setup
+def setup_database():
+    conn = sqlite3.connect('bandwidth_data.db')
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS bandwidth_data
+                 (client TEXT, ip TEXT, bandwidth REAL, timestamp TEXT)''')
+    conn.commit()
+    conn.close()
+
+def insert_bandwidth_data(client, ip, bandwidth, timestamp):
+    conn = sqlite3.connect('bandwidth_data.db')
+    c = conn.cursor()
+    c.execute("INSERT INTO bandwidth_data (client, ip, bandwidth, timestamp) VALUES (?, ?, ?, ?)",
+              (client, ip, bandwidth, timestamp))
+    conn.commit()
+    conn.close()
 
 # Step 1: Define the custom network topology
 def customTopology():
@@ -25,8 +43,8 @@ def customTopology():
 
     # Add links with initial bandwidth constraints
     net.addLink(server, router, bw=100)  # High bandwidth between server and router
-    link1 = net.addLink(router, client1, bw=100)  # Client1 starts with 30 Mbps
-    link2 = net.addLink(router, client2, bw=100)  # Client2 starts with 30 Mbps
+    link1 = net.addLink(router, client1)  # Client1 starts with 100 Mbps
+    link2 = net.addLink(router, client2)  # Client2 starts with 100 Mbps
 
     # Store links in the dictionary
     links['client1'] = link1
@@ -70,16 +88,8 @@ def monitorBandwidth(client, server, interval=5):
             bw_value = float(bandwidth.group(1))
             timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Get current timestamp
             print(f"Bandwidth from {client.name} to {server.name}: {bw_value} Mbits/sec at {timestamp}")
-            # Send data to Flask server with client's IP and timestamp
-            try:
-                requests.post("http://localhost:5000/api/bandwidth", json={
-                    "client": client.name,
-                    "ip": client.IP(),  # Include the client's IP address here
-                    "bandwidth": bw_value,
-                    "timestamp": timestamp  # Include the timestamp here
-                })
-            except requests.exceptions.RequestException as e:
-                print(f"Error sending data to Flask server: {e}")
+            # Insert data into SQLite database
+            insert_bandwidth_data(client.name, client.IP(), bw_value, timestamp)
         time.sleep(interval)
 
 # Step 3: Function to dynamically set client bandwidth
@@ -105,6 +115,9 @@ def startCLI(net):
 
 # Step 5: Run the full simulation
 def runSimulation():
+    # Setup the database
+    setup_database()
+
     # Create the network topology
     net, server, client1, client2, link1, link2 = customTopology()
 
