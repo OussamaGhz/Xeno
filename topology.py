@@ -6,6 +6,10 @@ import threading
 import time
 import re
 import requests
+from datetime import datetime  # Import datetime module
+
+# Dictionary to store link objects
+links = {}
 
 # Step 1: Define the custom network topology
 def customTopology():
@@ -21,8 +25,12 @@ def customTopology():
 
     # Add links with initial bandwidth constraints
     net.addLink(server, router, bw=100)  # High bandwidth between server and router
-    link1 = net.addLink(router, client1, bw=50)  # Client1 starts with 200 Mbps
-    link2 = net.addLink(router, client2, bw=50)  # Client2 starts with 200 Mbps
+    link1 = net.addLink(router, client1, bw=100)  # Client1 starts with 30 Mbps
+    link2 = net.addLink(router, client2, bw=100)  # Client2 starts with 30 Mbps
+
+    # Store links in the dictionary
+    links['client1'] = link1
+    links['client2'] = link2
 
     # Start the network
     net.start()
@@ -40,6 +48,10 @@ def customTopology():
     client1.cmd("route add default gw 10.0.1.254")
     client2.cmd("route add default gw 10.0.2.254")
 
+    # Test connectivity
+    print("Testing network connectivity")
+    net.pingAll()
+
     # Start iperf server on the server host
     server.cmd("iperf -s &")  # Server listens for iperf traffic
 
@@ -56,13 +68,15 @@ def monitorBandwidth(client, server, interval=5):
         bandwidth = re.search(r"(\d+\.\d+)\sMbits/sec", result)
         if bandwidth:
             bw_value = float(bandwidth.group(1))
-            print(f"Bandwidth from {client.name} to {server.name}: {bw_value} Mbits/sec")
-            # Send data to Flask server with client's IP
+            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Get current timestamp
+            print(f"Bandwidth from {client.name} to {server.name}: {bw_value} Mbits/sec at {timestamp}")
+            # Send data to Flask server with client's IP and timestamp
             try:
                 requests.post("http://localhost:5000/api/bandwidth", json={
                     "client": client.name,
                     "ip": client.IP(),  # Include the client's IP address here
-                    "bandwidth": bw_value
+                    "bandwidth": bw_value,
+                    "timestamp": timestamp  # Include the timestamp here
                 })
             except requests.exceptions.RequestException as e:
                 print(f"Error sending data to Flask server: {e}")
@@ -72,6 +86,7 @@ def monitorBandwidth(client, server, interval=5):
 def setCustomBandwidth(link, bw, client_iface, router_iface):
     """Set custom bandwidth for a link using tc directly, ensuring shell is initialized."""
     def configure_tc(node, iface, bw):
+        print(f"Configuring bandwidth {bw} Mbps for {iface} on {node.name}")
         for _ in range(5):  # Retry up to 5 times if the shell is waiting
             if node.shell and not node.waiting:
                 node.cmd(f"tc qdisc replace dev {iface} root tbf rate {bw}mbit burst 10kb latency 50ms")
@@ -87,8 +102,6 @@ def setCustomBandwidth(link, bw, client_iface, router_iface):
 def startCLI(net):
     """Start the Mininet CLI."""
     CLI(net)
-
-
 
 # Step 5: Run the full simulation
 def runSimulation():
