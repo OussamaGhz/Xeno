@@ -84,11 +84,12 @@ def run_flask():
 
 
 if __name__ == "__main__":
+    # Create the network topology and populate the links dictionary
+    customTopology()
+
     # Start the Mininet simulation in a separate thread
     mininet_thread = threading.Thread(target=runSimulation)
     mininet_thread.start()
-    
-    customTopology()
 
     # Start the Flask app
     flask_thread = threading.Thread(target=run_flask)
