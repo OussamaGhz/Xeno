@@ -10,7 +10,9 @@ import sqlite3
 
 # Dictionary to store link objects
 links = {}
+max_bandwidths = {}  # Dictionary to store max bandwidth values
 
+initial_bw = 40  # Initial bandwidth for clients
 
 # SQLite database setup
 def setup_database():
@@ -18,18 +20,29 @@ def setup_database():
     c = conn.cursor()
     c.execute(
         """CREATE TABLE IF NOT EXISTS bandwidth_data
-                 (client TEXT, ip TEXT, bandwidth REAL, timestamp TEXT)"""
+                 (client TEXT, ip TEXT, bandwidth REAL, max_bandwidth REAL, timestamp TEXT)"""
     )
     conn.commit()
     conn.close()
 
 
-def insert_bandwidth_data(client, ip, bandwidth, timestamp):
+def insert_bandwidth_data(client, ip, bandwidth, max_bandwidth, timestamp):
     conn = sqlite3.connect("bandwidth_data.db")
     c = conn.cursor()
     c.execute(
-        "INSERT INTO bandwidth_data (client, ip, bandwidth, timestamp) VALUES (?, ?, ?, ?)",
-        (client, ip, bandwidth, timestamp),
+        "INSERT INTO bandwidth_data (client, ip, bandwidth, max_bandwidth, timestamp) VALUES (?, ?, ?, ?, ?)",
+        (client, ip, bandwidth, max_bandwidth, timestamp),
+    )
+    conn.commit()
+    conn.close()
+
+
+def update_max_bandwidth(client, ip, max_bandwidth):
+    conn = sqlite3.connect("bandwidth_data.db")
+    c = conn.cursor()
+    c.execute(
+        "UPDATE bandwidth_data SET max_bandwidth = ?, ip = ? WHERE client = ?",
+        (max_bandwidth, ip, client),
     )
     conn.commit()
     conn.close()
@@ -53,12 +66,14 @@ def customTopology():
 
     # Add links with initial bandwidth constraints
     net.addLink(server, router, bw=100)  # High bandwidth between server and router
-    link1 = net.addLink(router, client1)  # Client1 starts with 100 Mbps
-    link2 = net.addLink(router, client2)  # Client2 starts with 100 Mbps
+    link1 = net.addLink(router, client1, bw=initial_bw)  # Client1 starts with initial_bw Mbps
+    link2 = net.addLink(router, client2, bw=initial_bw)  # Client2 starts with initial_bw Mbps
 
-    # Store links in the dictionary
+    # Store links and max bandwidths in the dictionaries
     links["client1"] = link1
     links["client2"] = link2
+    max_bandwidths["client1"] = initial_bw
+    max_bandwidths["client2"] = initial_bw
 
     # Start the network
     net.start()
@@ -89,6 +104,11 @@ def customTopology():
     # Start iperf server on the server host
     server.cmd("iperf -s &")  # Server listens for iperf traffic
 
+    # Insert initial bandwidth data into the database
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    insert_bandwidth_data("client1", client1.IP(), initial_bw, initial_bw, timestamp)
+    insert_bandwidth_data("client2", client2.IP(), initial_bw, initial_bw, timestamp)
+
     # Return network and link objects for further manipulation
     return net, server, client1, client2, link1, link2
 
@@ -103,6 +123,9 @@ def monitorBandwidth(client, server, interval=5):
         bandwidth = re.search(r"(\d+\.\d+)\sMbits/sec", result)
         if bandwidth:
             bw_value = float(bandwidth.group(1))
+            max_bw_value = max_bandwidths[
+                client.name
+            ]  # Get max bandwidth for the client
             timestamp = datetime.now().strftime(
                 "%Y-%m-%d %H:%M:%S"
             )  # Get current timestamp
@@ -110,7 +133,9 @@ def monitorBandwidth(client, server, interval=5):
                 f"Bandwidth from {client.name} to {server.name}: {bw_value} Mbits/sec at {timestamp}"
             )
             # Insert data into SQLite database
-            insert_bandwidth_data(client.name, client.IP(), bw_value, timestamp)
+            insert_bandwidth_data(
+                client.name, client.IP(), bw_value, max_bw_value, timestamp
+            )
         time.sleep(interval)
 
 
@@ -142,6 +167,12 @@ def setCustomBandwidth(link, bw, client_iface, router_iface):
     # Configure router interface on the router node
     configure_tc(link.intf1.node, router_iface, bw)
 
+    # Update the max bandwidth for the client
+    max_bandwidths[link.intf2.node.name] = bw
+
+    # Update the max bandwidth in the database
+    update_max_bandwidth(link.intf2.node.name, link.intf2.node.IP(), bw)
+
 
 # Step 4: Start Mininet CLI for manual interaction
 def startCLI(net):
@@ -169,13 +200,13 @@ def runSimulation():
     time.sleep(10)
     print("Changing Client1's bandwidth to 10 Mbps")
     setCustomBandwidth(
-        link1, 10, "client1-eth0", "router-eth1"
+        link1, 40, "client1-eth0", "router-eth1"
     )  # Change Client1's bandwidth to 10 Mbps
 
     time.sleep(10)
     print("Changing Client2's bandwidth to 5 Mbps")
     setCustomBandwidth(
-        link2, 5, "client2-eth0", "router-eth2"
+        link2, 40, "client2-eth0", "router-eth2"
     )  # Change Client2's bandwidth to 5 Mbps
 
     # Step 7: Start the Mininet CLI for manual testing
