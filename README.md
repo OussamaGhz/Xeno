@@ -2,7 +2,8 @@
 
 # API Documentation for Bandwidth Management
 
-## Base URL:
+## Base URL
+
 ```
 http://<your-server-ip>:5000/api
 ```
@@ -10,10 +11,12 @@ http://<your-server-ip>:5000/api
 ## Endpoints
 
 ### 1. Get All Clients' Bandwidth Data
+
 - **URL**: `/all`
 - **Method**: `GET`
 - **Description**: Retrieves bandwidth data for all clients, including IP, max bandwidth, and bandwidth usage over time.
 - **Response**:
+
     ```json
     [
         {
@@ -37,10 +40,12 @@ http://<your-server-ip>:5000/api
     ```
 
 ### 2. Add Bandwidth Data for a Client
+
 - **URL**: `/bandwidth`
 - **Method**: `POST`
 - **Description**: Inserts bandwidth data for a specific client.
 - **Request**:
+
     ```json
     {
         "client": "client1",
@@ -50,7 +55,9 @@ http://<your-server-ip>:5000/api
         "timestamp": "2024-10-19 12:02:00"
     }
     ```
+
 - **Response**:
+
     ```json
     {
         "status": "success"
@@ -58,17 +65,21 @@ http://<your-server-ip>:5000/api
     ```
 
 ### 3. Set Custom Bandwidth for a Client
+
 - **URL**: `/set_bandwidth`
 - **Method**: `POST`
 - **Description**: Updates the maximum bandwidth for a specific client.
 - **Request**:
+
     ```json
     {
         "client": "client1",
         "bandwidth": 10
     }
     ```
+
 - **Response**:
+
     ```json
     {
         "status": "success"
@@ -76,30 +87,78 @@ http://<your-server-ip>:5000/api
     ```
 
 ### 4. Get the Number of Clients
+
 - **URL**: `/clients/count`
 - **Method**: `GET`
 - **Description**: Retrieves the number of unique clients.
+- **Response**:
+
+    ```json
+    {
+        "count": 5
+    }
+    ```
 
 ### 5. Get Clients with Highest Bandwidth
+
 - **URL**: `/clients/highest_bandwidth`
 - **Method**: `GET`
 - **Description**: Retrieves the highest bandwidth used by each client.
+- **Response**:
 
+    ```json
+
+    [
+        {
+            "client": "client1",
+            "highest_bandwidth": 100.0
+        },
+    
+    ]
 ### 6. Get Latest Bandwidth per Client
+
 - **URL**: `/clients/latest_bandwidth`
 - **Method**: `GET`
 - **Description**: Retrieves the most recent bandwidth data for each client.
+- **Response**:
+
+    ```json
+
+        [
+            {
+                "client": "client1",
+                "latest_bandwidth": 50.0,
+                "timestamp": "2023-10-01T12:00:00Z"
+            },
+        ]
+    ```
 
 ### 7. Get Max Bandwidth per Client
+
 - **URL**: `/clients/max_bandwidth`
 - **Method**: `GET`
 - **Description**: Retrieves the maximum bandwidth set for each client.
+**Response**:
+
+    ```json
+
+    [
+        {
+            "client": "client1",
+            "max_bandwidth": 100.0
+        },
+  ...
+
+    ]   
+    ```
 
 ### 8. Get Specific Client Information
+
 - **URL**: `/client/<client_id>`
 - **Method**: `GET`
 - **Description**: Retrieves detailed information, including IP, max bandwidth, highest bandwidth, and latest bandwidth for a specific client.
 - **Response**:
+
     ```json
     {
         "client": "client1",
