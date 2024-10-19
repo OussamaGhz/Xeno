@@ -1,16 +1,147 @@
-# Xeno
+# Bandwidth Management System Documentation
 
-# API Documentation for Bandwidth Management
+## Table of Contents
 
-## Base URL
+1. [Mininet Installation Guide](#mininet-installation-guide)
+2. [Backend Documentation](#backend-documentation)
+3. [Frontend Documentation](#frontend-documentation)
+4. [API Documentation](#api-documentation)
 
-```
-http://<your-server-ip>:5000/api
-```
+---
 
-## Endpoints
+## Mininet Installation Guide
 
-### 1. Get All Clients' Bandwidth Data
+### Prerequisites
+
+- **Linux**: Ensure you have a Linux distribution installed on your system.
+
+### Installation Steps
+
+#### Ubuntu/Debian
+
+1. **Update Package List**:
+    ```bash
+    sudo apt-get update
+    ```
+
+2. **Install Mininet**:
+    ```bash
+    sudo apt-get install mininet
+    ```
+
+3. **Verify Installation**:
+    Run the following command to verify that Mininet is installed correctly:
+    ```bash
+    sudo mn --test pingall
+    ```
+
+#### CentOS/RHEL
+
+1. **Install EPEL Repository**:
+    ```bash
+    sudo yum install epel-release
+    ```
+
+2. **Install Mininet Dependencies**:
+    ```bash
+    sudo yum install git python3
+    ```
+
+3. **Clone Mininet Repository**:
+    ```bash
+    git clone git://github.com/mininet/mininet
+    cd mininet
+    ```
+
+4. **Install Mininet**:
+    ```bash
+    sudo ./util/install.sh -a
+    ```
+
+5. **Verify Installation**:
+    Run the following command to verify that Mininet is installed correctly:
+    ```bash
+    sudo mn --test pingall
+    ```
+
+#### Arch Linux
+
+1. **Install Mininet**:
+    ```bash
+    sudo pacman -S mininet
+    ```
+
+2. **Verify Installation**:
+    Run the following command to verify that Mininet is installed correctly:
+    ```bash
+    sudo mn --test pingall
+    ```
+
+If the installation is successful, you should see output indicating that all hosts can ping each other.
+
+---
+
+## Backend Documentation
+
+### Prerequisites
+
+- **Python 3.7+**: Ensure Python is installed on your system.
+
+### Installation Steps
+
+1. **Navigate to the Backend Directory**:
+    ```bash
+    cd Backend
+    ```
+
+2. **Install Dependencies**:
+    Install the required Python packages from `requirements.txt`:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3. **Run the Server**:
+    Start the Flask server using the following command:
+    ```bash
+    sudo python main.py
+    ```
+
+---
+
+## Frontend Documentation
+
+### Prerequisites
+
+- **Node.js**: Ensure Node.js is installed on your system.
+
+### Installation Steps
+
+1. **Navigate to the Frontend Directory**:
+    ```bash
+    cd Frontend
+    ```
+
+2. **Install Dependencies**:
+    Install the required Node packages:
+    ```bash
+    npm install
+    ```
+
+3. **Run the Application**:
+    Start the Next.js application:
+    ```bash
+    npm run dev
+    ```
+
+Your frontend should now be accessible at `http://localhost:3000`.
+
+---
+
+## API Documentation for Bandwidth Management
+
+### Endpoints
+
+#### 1. Get All Clients' Bandwidth Data
 
 - **URL**: `/all`
 - **Method**: `GET`
@@ -39,7 +170,7 @@ http://<your-server-ip>:5000/api
     ]
     ```
 
-### 2. Add Bandwidth Data for a Client
+#### 2. Add Bandwidth Data for a Client
 
 - **URL**: `/bandwidth`
 - **Method**: `POST`
@@ -64,7 +195,7 @@ http://<your-server-ip>:5000/api
     }
     ```
 
-### 3. Set Custom Bandwidth for a Client
+#### 3. Set Custom Bandwidth for a Client
 
 - **URL**: `/set_bandwidth`
 - **Method**: `POST`
@@ -86,7 +217,7 @@ http://<your-server-ip>:5000/api
     }
     ```
 
-### 4. Get the Number of Clients
+#### 4. Get the Number of Clients
 
 - **URL**: `/clients/count`
 - **Method**: `GET`
@@ -99,7 +230,7 @@ http://<your-server-ip>:5000/api
     }
     ```
 
-### 5. Get Clients with Highest Bandwidth
+#### 5. Get Clients with Highest Bandwidth
 
 - **URL**: `/clients/highest_bandwidth`
 - **Method**: `GET`
@@ -107,15 +238,15 @@ http://<your-server-ip>:5000/api
 - **Response**:
 
     ```json
-
     [
         {
             "client": "client1",
             "highest_bandwidth": 100.0
-        },
-    
+        }
     ]
-### 6. Get Latest Bandwidth per Client
+    ```
+
+#### 6. Get Latest Bandwidth per Client
 
 - **URL**: `/clients/latest_bandwidth`
 - **Method**: `GET`
@@ -123,36 +254,32 @@ http://<your-server-ip>:5000/api
 - **Response**:
 
     ```json
-
-        [
-            {
-                "client": "client1",
-                "latest_bandwidth": 50.0,
-                "timestamp": "2023-10-01T12:00:00Z"
-            },
-        ]
+    [
+        {
+            "client": "client1",
+            "latest_bandwidth": 50.0,
+            "timestamp": "2023-10-01T12:00:00Z"
+        }
+    ]
     ```
 
-### 7. Get Max Bandwidth per Client
+#### 7. Get Max Bandwidth per Client
 
 - **URL**: `/clients/max_bandwidth`
 - **Method**: `GET`
 - **Description**: Retrieves the maximum bandwidth set for each client.
-**Response**:
+- **Response**:
 
     ```json
-
     [
         {
             "client": "client1",
             "max_bandwidth": 100.0
-        },
-  ...
-
-    ]   
+        }
+    ]
     ```
 
-### 8. Get Specific Client Information
+#### 8. Get Specific Client Information
 
 - **URL**: `/client/<client_id>`
 - **Method**: `GET`
@@ -173,3 +300,5 @@ http://<your-server-ip>:5000/api
         ]
     }
     ```
+
+---

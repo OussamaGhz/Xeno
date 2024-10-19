@@ -1,3 +1,10 @@
+
+#future implementation of the DBAS algorithm
+# if you are here, you can igone this file, the main files are (main.py, topology.py)
+#
+#
+#
+
 import time
 from threading import Thread
 import random

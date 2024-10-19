@@ -66,8 +66,8 @@ def customTopology():
 
     # Add links with initial bandwidth constraints
     net.addLink(server, router, bw=100)  # High bandwidth between server and router
-    link1 = net.addLink(router, client1, bw=initial_bw)  # Client1 starts with initial_bw Mbps
-    link2 = net.addLink(router, client2, bw=initial_bw)  # Client2 starts with initial_bw Mbps
+    link1 = net.addLink(router, client1, bw=initial_bw) 
+    link2 = net.addLink(router, client2, bw=initial_bw)  
 
     # Store links and max bandwidths in the dictionaries
     links["client1"] = link1
