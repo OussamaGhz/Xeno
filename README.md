@@ -132,7 +132,7 @@ Your backend should now be accessible at `http://localhost:5000`.
 
 1. **Navigate to the Frontend Directory**:
     ```bash
-    cd Frontend
+    cd front
     ```
 
 2. **Install Dependencies**:
