@@ -4,14 +4,17 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { Bell,CircleUser } from 'lucide-react';
+import { usePathname } from "next/navigation";
 
 const Nav = () => {
+  const pathname = usePathname();
+  if (pathname === "/") return null;
   return (
     <nav className="flex justify-between text-white py-3 px-6 w-full border-b-2"
-        style={{backgroundColor: "#292E30",borderColor: "#4682B6"}}
+        style={{backgroundColor: "#292E30",borderColor: "#4682B6",height: "59px"}}
     >
       <div className="flex items-center">
-        <h1 className="text-lg font-light">
+        <h1 className="Nav-title text-lg font-light">
         Efficient Network Solutions for Seamless Performance
         </h1>
       </div>

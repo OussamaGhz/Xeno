@@ -12,6 +12,7 @@
 
 .active {
   @apply border-2 border-[#4682B6];
+  color: #4682B6;
 }
 .active_periode {
   @apply bg-[#4682B6] text-white hover:text-[#366295] border-2 border-[#4682B6] hover:border-[#366295] px-5 rounded-lg;
@@ -88,3 +89,28 @@
     @apply bg-background text-foreground;
   }
 }
+
+@media (max-width: 830px) {
+  .Nav-title{
+    display: none;
+  }
+  .sideBar {
+    display: none;
+  }
+  .s-bar {
+    display: flex;
+  }
+  
+}
+@media (min-width: 831px) {
+  
+  .sideBar {
+    display: flex;
+  }
+  .s-bar {
+    display: none;
+  }
+  
+}
+
+

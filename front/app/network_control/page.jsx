@@ -1,6 +1,14 @@
 import BandwidthMax from "@components/BandWidthMax";
 import ClientsSummary from "@components/ClientsSummary";
 import { Wifi, Server, Database, Globe } from "lucide-react";
+import NetworkUsageGraph from "@components/OurChart";
+
+
+// Sample data for the graph
+const data = Array.from({ length: 21 }, (_, i) => ({
+    time: i,
+    usage: 5 + Math.sin(i * 0.5) * 2 + Math.random() * 1.5,
+}));
 
 const Page = () => {
     return (
@@ -9,9 +17,13 @@ const Page = () => {
         w-full
         flex-col
         flex-center
-  
+        mb-[64px]
       "
         >
+            <NetworkUsageGraph
+                data={data}
+                title={"Network Usage"}
+            />
             <ClientsSummary
                 clients={[
                     {
