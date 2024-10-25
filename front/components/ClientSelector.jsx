@@ -1,61 +1,61 @@
 import React, { useState } from "react";
 
-const ClientSelector = ({ currentClient, onClientSelect }) => {
+const ClientSelector = ({ currentClient, onClientSelect,clients }) => {
     const [isOpen, setIsOpen] = useState(false);
 
     // Sample data - replace with your actual data source
-    const clients = [
-        { id: "client1", status: "Unknown", ip: "192.168.1.1", allocatedBW: 7 },
-        {
-            id: "client2",
-            status: "Unknown",
-            ip: "192.168.1.2",
-            allocatedBW: 15,
-        },
-        {
-            id: "client3",
-            status: "Unknown",
-            ip: "192.168.1.3",
-            allocatedBW: 10,
-        },
-        {
-            id: "client4",
-            status: "Unknown",
-            ip: "192.168.1.4",
-            allocatedBW: 18,
-        },
-        { id: "client5", status: "Unknown", ip: "192.168.1.5", allocatedBW: 9 },
-        {
-            id: "client6",
-            status: "Unknown",
-            ip: "192.168.1.6",
-            allocatedBW: 16,
-        },
-        {
-            id: "client7",
-            status: "Unknown",
-            ip: "192.168.1.7",
-            allocatedBW: 20,
-        },
-        {
-            id: "client8",
-            status: "Unknown",
-            ip: "192.168.1.8",
-            allocatedBW: 25,
-        },
-        {
-            id: "client9",
-            status: "Unknown",
-            ip: "192.168.1.9",
-            allocatedBW: 13,
-        },
-        {
-            id: "client10",
-            status: "Unknown",
-            ip: "192.168.1.10",
-            allocatedBW: 14,
-        },
-    ];
+    // const clients = [
+    //     { id: "client1", status: "Unknown", ip: "192.168.1.1", allocatedBW: 7 },
+    //     {
+    //         id: "client2",
+    //         status: "Unknown",
+    //         ip: "192.168.1.2",
+    //         allocatedBW: 15,
+    //     },
+    //     {
+    //         id: "client3",
+    //         status: "Unknown",
+    //         ip: "192.168.1.3",
+    //         allocatedBW: 10,
+    //     },
+    //     {
+    //         id: "client4",
+    //         status: "Unknown",
+    //         ip: "192.168.1.4",
+    //         allocatedBW: 18,
+    //     },
+    //     { id: "client5", status: "Unknown", ip: "192.168.1.5", allocatedBW: 9 },
+    //     {
+    //         id: "client6",
+    //         status: "Unknown",
+    //         ip: "192.168.1.6",
+    //         allocatedBW: 16,
+    //     },
+    //     {
+    //         id: "client7",
+    //         status: "Unknown",
+    //         ip: "192.168.1.7",
+    //         allocatedBW: 20,
+    //     },
+    //     {
+    //         id: "client8",
+    //         status: "Unknown",
+    //         ip: "192.168.1.8",
+    //         allocatedBW: 25,
+    //     },
+    //     {
+    //         id: "client9",
+    //         status: "Unknown",
+    //         ip: "192.168.1.9",
+    //         allocatedBW: 13,
+    //     },
+    //     {
+    //         id: "client10",
+    //         status: "Unknown",
+    //         ip: "192.168.1.10",
+    //         allocatedBW: 14,
+    //     },
+    // ];
 
     const handleClientSelect = (client) => {
         onClientSelect(client);
@@ -75,7 +75,7 @@ const ClientSelector = ({ currentClient, onClientSelect }) => {
                         </div>
                         <div className="flex justify-between">
                             <span className="text-zinc-400">Status</span>
-                            <span>{currentClient.status}</span>
+                            <span>Active</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-zinc-400">IP Address</span>
@@ -111,7 +111,7 @@ const ClientSelector = ({ currentClient, onClientSelect }) => {
                                     {currentClient.clientId}
                                 </td>
                                 <td className="px-4 py-2">
-                                    {currentClient.status}
+                                    Active
                                 </td>
                                 <td className="px-4 py-2">
                                     {currentClient.ipAddress}
@@ -167,7 +167,7 @@ rounded-sm border-[#4682B6]"
                                                 clientId: client.id,
                                                 status: "Active",
                                                 ipAddress: client.ip,
-                                                allocatedBW: client.allocatedBW,
+                                                allocatedBW: client.data[client.data.length - 1].bandwidth,
                                             })
                                         }
                                     >
@@ -180,12 +180,6 @@ rounded-sm border-[#4682B6]"
                                             </div>
                                             <div>
                                                 <div className="text-sm text-zinc-500">
-                                                    Status
-                                                </div>
-                                                <div>{client.status}</div>
-                                            </div>
-                                            <div>
-                                                <div className="text-sm text-zinc-500">
                                                     IP Address
                                                 </div>
                                                 <div>{client.ip}</div>
@@ -195,7 +189,7 @@ rounded-sm border-[#4682B6]"
                                                     Allocated BW
                                                 </div>
                                                 <div>
-                                                    {client.allocatedBW} Mbps
+                                                    {client.data[client.data.length - 1].bandwidth} Mbps
                                                 </div>
                                             </div>
                                         </div>
@@ -237,7 +231,7 @@ rounded-sm border-[#4682B6]"
                                                         status: "Active",
                                                         ipAddress: client.ip,
                                                         allocatedBW:
-                                                            client.allocatedBW,
+                                                        client.data[client.data.length - 1].bandwidth,
                                                     })
                                                 }
                                             >
@@ -245,7 +239,7 @@ rounded-sm border-[#4682B6]"
                                                     {client.id}
                                                 </td>
                                                 <td className="px-4 py-2">
-                                                    {client.status}
+                                                    Active
                                                 </td>
                                                 <td className="px-4 py-2">
                                                     {client.ip}

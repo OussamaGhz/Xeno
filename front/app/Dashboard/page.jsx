@@ -7,7 +7,40 @@ import ClientsSummary from "@components/ClientsSummary";
 import ProtectedRoute from "@/components/ProtectedRoute"; // Adjust the import path based on your file structure
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { kMaxLength } from "buffer";
+// import { kMaxLength } from "buffer";
+function formatClientDataForChart(clientData) {
+    // Find the earliest and latest timestamps
+    let timestamps = clientData.flatMap(client => 
+        client.data.map(d => new Date(d.timestamp).getTime())
+    );
+    const minTime = Math.min(...timestamps);
+    
+    // Create a map of timestamps to total bandwidth usage
+    const timeMap = new Map();
+    
+    // Process each client's data
+    clientData.forEach(client => {
+        client.data.forEach(dataPoint => {
+            const timestamp = new Date(dataPoint.timestamp).getTime();
+            // Calculate minutes since start
+            const timeInMinutes = Math.floor((timestamp - minTime) / (1000 * 60));
+            
+            // Add bandwidth to existing total or create new entry
+            const currentTotal = timeMap.get(timeInMinutes) || 0;
+            timeMap.set(timeInMinutes, currentTotal + dataPoint.bandwidth);
+        });
+    });
+    
+    // Convert map to array format
+    const formattedData = Array.from(timeMap.entries())
+        .map(([time, usage]) => ({
+            time,
+            usage
+        }))
+        .sort((a, b) => a.time - b.time);
+        
+    return formattedData;
+}
 
 function findPeakBandwidth(clients) {
     // Create a map to store hourly bandwidth sums
@@ -46,12 +79,10 @@ function findPeakBandwidth(clients) {
 }
 
 // Sample data for the graph
-const data = Array.from({ length: 21 }, (_, i) => ({
-    time: i,
-    usage: 5 + Math.sin(i * 0.5) * 2 + Math.random() * 1.5,
-}));
-
-
+// const data = Array.from({ length: 21 }, (_, i) => ({
+//     time: i,
+//     usage: 5 + Math.sin(i * 0.5) * 2 + Math.random() * 1.5,
+// }));
 
 const dummyData_clientSummary = [
     {
@@ -67,7 +98,12 @@ const dummyData_clientSummary = [
         id: "client2",
         ip: "192.168.1.2",
         max_bandwidth: 20,
-        data: [{ bandwidth: 15, timestamp: "2024-10-19 12:00:00" }],
+        data: [
+            { bandwidth: 15, timestamp: "2024-10-19 8:00:00" },
+            { bandwidth: 15, timestamp: "2024-10-19 8:00:00" },
+            { bandwidth: 15, timestamp: "2024-10-19 8:00:00" },
+
+        ],
     },
     {
         id: "client3",
@@ -187,6 +223,7 @@ const DashboardContent = () => {
     const [clientSummary, setClientSummary] = useState([]);
     const [peackUsage, setPeackUsage] = useState(0);
     const [maxMir, setMaxMir] = useState(0);
+    const [chartData, setChartData] = useState([]);
     const fetchData = async () => {
         try {
             const response = await axios.get("http://localhost:3000/api/all");
@@ -215,11 +252,15 @@ const DashboardContent = () => {
     useEffect(() => {
         if (clientSummary.length > 0) {  // Only calculate if we have data
             setPeackUsage(findPeakBandwidth(clientSummary).totalBandwidth);
+
         }
+        let tmp = formatClientDataForChart(clientSummary);
+        console.log("tmp=",tmp)
+        setChartData(tmp);
     }, [clientSummary]);
     return (
         <section className="w-full flex-col flex-center mb-[64px]">
-            <NetworkUsage data={data} title={"Network Usage"} />
+            <NetworkUsage data={clientSummary} title={"Network Usage"} />
             <div className="flex flex-row justify-between gap-3 mb-3">
                 <Cards
                     title="Connected Clients"
