@@ -185,7 +185,7 @@ class SatelliteBandwidthEnv(gym.Env):
 
 
 # Load your test data
-train_df = pd.read_csv('RL-agent/optim_train_set.csv', sep=',')  # Adjust the path as necessary
+train_df = pd.read_csv('RL/optim_train_set.csv', sep=',')  # Adjust the path as necessary
 
 train_df = train_df.sort_values('Date')
 
@@ -193,7 +193,7 @@ train_df = train_df.sort_values('Date')
 test_env = SatelliteBandwidthEnv(data=train_df)
 
 # Load the trained model
-model = PPO.load("ppo_satellite_bandwidth")
+model = PPO.load("RL/ppo_satellite_bandwidth")
 
 # Reset the environment to start a new episode
 obs = test_env.reset(time_step=0)
@@ -221,7 +221,7 @@ print(test_env.R_efficiency_avg/test_env.N)
 
 
 # Load and preprocess your test data
-test_df = pd.read_csv('RL-agent/test_data.csv', sep=';')  # Use the correct delimiter ';'
+test_df = pd.read_csv('RL/test_data.csv', sep=';')  # Use the correct delimiter ';'
 print(test_df)
 # Convert 'Date' column to datetime and then to Unix timestamp
 test_df['Date'] = pd.to_datetime(test_df['Date'], format='%d/%m/%Y %H:%M')
@@ -231,7 +231,7 @@ test_df = test_df.sort_values('Date')  # Sort by date if necessary
 test_env = SatelliteBandwidthEnv(data=test_df)
 
 # Load the trained model
-model = PPO.load("ppo_satellite_bandwidth")
+model = PPO.load("RL/ppo_satellite_bandwidth")
 
 # Reset the environment to start a new episode
 obs = test_env.reset(time_step=0)
