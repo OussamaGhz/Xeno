@@ -17,7 +17,7 @@ const Page = () => {
         w-full
         flex-col
         flex-center
-  
+        mb-[64px]
       "
         >
             <NetworkUsageGraph

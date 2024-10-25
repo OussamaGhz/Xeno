@@ -93,7 +93,7 @@ const Page = () => {
     );
 
     return (
-        <section className="w-full flex-col flex-center">
+        <section className="w-full flex-col flex-center mb-[64px]">
             {/* Alert */}
             {alert.show && (
                 <Alert className="fixed top-4 right-4 bg-green-500 text-white">

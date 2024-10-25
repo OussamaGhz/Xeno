@@ -7,17 +7,19 @@ import Link from "next/link";
 import Image from "next/image";
 import logo from "../public/logo.png";
 
+
 const SideBar = () => {
     const pathname = usePathname();
     useEffect(() => {
         console.log("Path changed"); // Log when path changes
         console.log(pathname); // Log current path
     }, [pathname]); // Run this effect when path changes
+    if (pathname === "/") return null;
     return (
-        <div className="flex flex-col border-r-2 border-r-[#4682B6] h-full">
+        <div className="sideBar flex flex-col border-r-2 border-r-[#4682B6] h-full">
             <div
                 className="flex justify-center items-center border-b-2 w-full border-b-[#4682B6]"
-                style={{ height: "59px" }}
+                style={{ height: "64px" }}
             >
                 <Image src={logo} alt="Initiativ" width={200} height={200} />
             </div>
