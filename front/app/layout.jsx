@@ -1,7 +1,9 @@
 import "@styles/globals.css";
 import Nav from "@components/Nav";
-import SideBar from "@components/sideBar";``
+import SideBar from "@components/sideBar";
+``;
 import SmallSideBar from "@components/SmallSideBar";
+import { AuthProvider } from "../contexts/AuthContext";
 
 export const metadata = {
     title: "Initiativ",
@@ -15,20 +17,22 @@ const RootLayout = ({ children }) => (
                 backgroundColor: "#292E30",
             }}
         >
-                <main
-                    className="flex justify-center flex-row w-full mx-auto"
-                    style={{
-                        height: "100vh",
-                        position: "relative",
-                    }}
-                >
-                    <SideBar></SideBar>
-                    <div className="flex flex-col w-full">
-                        <Nav></Nav>
+            <main
+                className="flex justify-center flex-row w-full mx-auto"
+                style={{
+                    height: "100vh",
+                    position: "relative",
+                }}
+            >
+                <SideBar></SideBar>
+                <div className="flex flex-col w-full">
+                    <Nav></Nav>
+                    <AuthProvider>
                         <div className="w-full py-3 px-3">{children}</div>
-                        <SmallSideBar/>
-                    </div>
-                </main>
+                    </AuthProvider>
+                    <SmallSideBar />
+                </div>
+            </main>
         </body>
     </html>
 );

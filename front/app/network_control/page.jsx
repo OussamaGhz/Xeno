@@ -1,8 +1,9 @@
+"use client";
 import BandwidthMax from "@components/BandWidthMax";
 import ClientsSummary from "@components/ClientsSummary";
 import { Wifi, Server, Database, Globe } from "lucide-react";
 import NetworkUsageGraph from "@components/OurChart";
-
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 // Sample data for the graph
 const data = Array.from({ length: 21 }, (_, i) => ({
@@ -10,16 +11,10 @@ const data = Array.from({ length: 21 }, (_, i) => ({
     usage: 5 + Math.sin(i * 0.5) * 2 + Math.random() * 1.5,
 }));
 
-const Page = () => {
+// Separate the main content into its own component
+const NetworkContent = () => {
     return (
-        <section
-            className="
-        w-full
-        flex-col
-        flex-center
-        mb-[64px]
-      "
-        >
+        <section className="w-full flex-col flex-center mb-[64px]">
             <NetworkUsageGraph
                 data={data}
                 title={"Network Usage"}
@@ -57,7 +52,7 @@ const Page = () => {
                 ]}
                 inNetworkControl={true}
             />
-            {/* //!heath:start  */}
+            {/* Health Indicators */}
             <div className="mb-3 flex flex-col rounded-sm border-2 gap-y-5 justify-between w-full border-[#4682B6] px-6">
                 <div className="text-center w-fit mx-auto border-2 rounded-b-2xl rounded-t-none border-t-0 border-[#4682B6] px-12">
                     <span className="text-lg text-white mb-4">
@@ -105,9 +100,17 @@ const Page = () => {
                     </div>
                 </div>
             </div>
-            {/* //!heath:end  */}
             <BandwidthMax />
         </section>
+    );
+};
+
+// Wrap the page with ProtectedRoute
+const Page = () => {
+    return (
+        <ProtectedRoute>
+            <NetworkContent />
+        </ProtectedRoute>
     );
 };
 

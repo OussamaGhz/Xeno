@@ -1,15 +1,20 @@
+"use client";
+import React from "react";
 import OneClientSummary from "@components/OneClientSummary";
 import ControlsCard from "@components/ControlsCard";
 import BandwidthMax from "@components/BandWidthMax";
 import NetworkUsageGraph from "@components/OurChart";
 import ClientSatisfaction from "@components/ClientSatisfaction";
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 // Sample data for the graph
 const data = Array.from({ length: 21 }, (_, i) => ({
     time: i,
     usage: 5 + Math.sin(i * 0.5) * 2 + Math.random() * 1.5,
 }));
-const Page = () => {
+
+// Separate the main content into its own component
+const DashboardContent = () => {
     return (
         <section
             className="
@@ -40,7 +45,6 @@ const Page = () => {
                 </button>
             </div>
             <div className="flex flex-row justify-between gap-3 my-3">
-                {/* //! */}
                 <div className="flex flex-col rounded-sm border-2 w-full border-[#4682B6]">
                     <h1 className="text-white text-center py-1 px-2">
                         Peak Usage
@@ -71,7 +75,6 @@ const Page = () => {
                         </div>
                     </div>
                 </div>
-                {/* //!  */}
                 <div className="flex flex-col rounded-sm border-2 w-full border-[#4682B6]">
                     <h1 className="text-white text-center py-1 px-2">
                         Average Speed
@@ -92,10 +95,8 @@ const Page = () => {
                         </div>
                     </div>
                 </div>
-                {/* //!  */}
             </div>
             <ClientSatisfaction percentage={80} rating="Excellent" />
-            {/* //! */}
             <div className="flex flex-row justify-between gap-3 my-3">
                 <ControlsCard
                     controle={{
@@ -139,10 +140,17 @@ const Page = () => {
                     Test Again
                 </button>
             </div>
-            {/* //!band width max:start  */}
             <BandwidthMax />
-            {/* //!band width max:end  */}
         </section>
+    );
+};
+
+// Wrap the page with ProtectedRoute
+const Page = () => {
+    return (
+        <ProtectedRoute>
+            <DashboardContent />
+        </ProtectedRoute>
     );
 };
 

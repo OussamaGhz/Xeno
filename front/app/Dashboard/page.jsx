@@ -1,23 +1,20 @@
+"use client";
+
 import NetworkUsage from "@components/OurChart";
 import Cards from "@components/Cards";
 import Link from "next/link";
 import ClientsSummary from "@components/ClientsSummary";
+import ProtectedRoute from '@/components/ProtectedRoute'; // Adjust the import path based on your file structure
 
 // Sample data for the graph
 const data = Array.from({ length: 21 }, (_, i) => ({
     time: i,
     usage: 5 + Math.sin(i * 0.5) * 2 + Math.random() * 1.5,
 }));
-const Page = () => {
+
+const DashboardContent = () => {
     return (
-        <section
-            className="
-        w-full
-        flex-col
-        flex-center
-        mb-[64px]
-    "
-        >
+        <section className="w-full flex-col flex-center mb-[64px]">
             <NetworkUsage data={data} title={"Network Usage"} />
             <div className="flex flex-row justify-between gap-3 mb-3">
                 <Cards
@@ -78,7 +75,6 @@ const Page = () => {
                     description="+100 from last Year"
                     buttonLink="/network_control"
                 />
-                {/* //! */}
                 <div className="flex flex-col rounded-sm border-2 w-full border-[#4682B6]">
                     <h1 className="text-white py-1 px-2 text-lg md:text-xl">
                         Limits
@@ -120,9 +116,17 @@ const Page = () => {
                         </Link>
                     </div>
                 </div>
-                {/* //! */}
             </div>
         </section>
+    );
+};
+
+// Wrap the page with ProtectedRoute
+const Page = () => {
+    return (
+        <ProtectedRoute>
+            <DashboardContent />
+        </ProtectedRoute>
     );
 };
 
