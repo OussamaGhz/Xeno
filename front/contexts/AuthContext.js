@@ -7,7 +7,7 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
     //check if the isLoggedIn in the local storage
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(true);
     useEffect(() => {
         const isLogged = localStorage.getItem('isLoggedIn');
         if (isLogged) {

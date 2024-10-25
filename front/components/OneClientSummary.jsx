@@ -4,7 +4,6 @@ const OneClientSummary = ({ client }) => {
     // Labels for mobile view
     const labels = {
         clientId: "Client ID",
-        currentSpeed: "Current Speed",
         status: "Status",
         ipAddress: "IP Address",
         allocatedBW: "Allocated BW",
@@ -27,7 +26,6 @@ const OneClientSummary = ({ client }) => {
                     <tbody>
                         <tr className="border-[#4682B6] hover:bg-gray-700">
                             <td className="px-4 py-2">{client.clientId}</td>
-                            <td className="px-4 py-2">{client.currentSpeed}</td>
                             <td className="px-4 py-2">{client.status}</td>
                             <td className="px-4 py-2">{client.ipAddress}</td>
                             <td className="px-4 py-2">{client.allocatedBW}</td>

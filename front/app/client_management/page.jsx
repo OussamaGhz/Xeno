@@ -5,7 +5,7 @@ import ControlsCard from "@components/ControlsCard";
 import BandwidthMax from "@components/BandWidthMax";
 import NetworkUsageGraph from "@components/OurChart";
 import ClientSatisfaction from "@components/ClientSatisfaction";
-import ProtectedRoute from '@/components/ProtectedRoute';
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 // Sample data for the graph
 const data = Array.from({ length: 21 }, (_, i) => ({
@@ -18,19 +18,18 @@ const DashboardContent = () => {
     return (
         <section
             className="
-      w-full
-      h-full
-      flex-col
-      flex-center
-      justify-center
-      mb-[64px]
+        w-full
+        h-full
+        flex-col
+        flex-center
+        justify-center
+        mb-[64px]
     "
         >
             <NetworkUsageGraph data={data} title={"Usage Graph"} />
             <OneClientSummary
                 client={{
                     clientId: "C001",
-                    currentSpeed: "10 Mbps",
                     status: "Active",
                     ipAddress: "192.168.1.100",
                     allocatedBW: "20 Mbps",

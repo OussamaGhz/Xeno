@@ -8,6 +8,9 @@ front/node_modules
 /.next/
 /out/
 
+node_modules/
+node_modules
+
 # production
 /build
 

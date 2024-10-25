@@ -4,15 +4,115 @@ import ClientsSummary from "@components/ClientsSummary";
 import { Wifi, Server, Database, Globe } from "lucide-react";
 import NetworkUsageGraph from "@components/OurChart";
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 // Sample data for the graph
 const data = Array.from({ length: 21 }, (_, i) => ({
     time: i,
     usage: 5 + Math.sin(i * 0.5) * 2 + Math.random() * 1.5,
 }));
-
+const dummyData_clientSummary = [
+    {
+        id: "client1",
+        ip: "192.168.1.1",
+        max_bandwidth: 10,
+        data: [
+            { bandwidth: 5, timestamp: "2024-10-19 12:00:00" },
+            { bandwidth: 7, timestamp: "2024-10-19 12:01:00" },
+        ],
+    },
+    {
+        id: "client2",
+        ip: "192.168.1.2",
+        max_bandwidth: 20,
+        data: [{ bandwidth: 15, timestamp: "2024-10-19 12:00:00" }],
+    },
+    {
+        id: "client3",
+        ip: "192.168.1.3",
+        max_bandwidth: 15,
+        data: [
+            { bandwidth: 8, timestamp: "2024-10-19 12:00:00" },
+            { bandwidth: 10, timestamp: "2024-10-19 12:02:00" },
+        ],
+    },
+    {
+        id: "client4",
+        ip: "192.168.1.4",
+        max_bandwidth: 25,
+        data: [
+            { bandwidth: 20, timestamp: "2024-10-19 12:00:00" },
+            { bandwidth: 18, timestamp: "2024-10-19 12:03:00" },
+        ],
+    },
+    {
+        id: "client5",
+        ip: "192.168.1.5",
+        max_bandwidth: 12,
+        data: [
+            { bandwidth: 6, timestamp: "2024-10-19 12:00:00" },
+            { bandwidth: 9, timestamp: "2024-10-19 12:01:00" },
+        ],
+    },
+    {
+        id: "client6",
+        ip: "192.168.1.6",
+        max_bandwidth: 18,
+        data: [
+            { bandwidth: 12, timestamp: "2024-10-19 12:00:00" },
+            { bandwidth: 16, timestamp: "2024-10-19 12:02:00" },
+        ],
+    },
+    {
+        id: "client7",
+        ip: "192.168.1.7",
+        max_bandwidth: 22,
+        data: [
+            { bandwidth: 18, timestamp: "2024-10-19 12:00:00" },
+            { bandwidth: 20, timestamp: "2024-10-19 12:01:00" },
+        ],
+    },
+    {
+        id: "client8",
+        ip: "192.168.1.8",
+        max_bandwidth: 30,
+        data: [{ bandwidth: 25, timestamp: "2024-10-19 12:00:00" }],
+    },
+    {
+        id: "client9",
+        ip: "192.168.1.9",
+        max_bandwidth: 14,
+        data: [
+            { bandwidth: 10, timestamp: "2024-10-19 12:00:00" },
+            { bandwidth: 13, timestamp: "2024-10-19 12:02:00" },
+        ],
+    },
+    {
+        id: "client10",
+        ip: "192.168.1.10",
+        max_bandwidth: 16,
+        data: [
+            { bandwidth: 11, timestamp: "2024-10-19 12:00:00" },
+            { bandwidth: 14, timestamp: "2024-10-19 12:01:00" },
+        ],
+    },
+];
 // Separate the main content into its own component
 const NetworkContent = () => {
+    const [clientSummary, setClientSummary] = useState([]);
+    const fetchData = async () => {
+        try {
+            const response = await axios.get("http://localhost:3000/api/all");
+            setClientSummary(response);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+    useEffect(() => {
+        // fetchData();//todo activate this line in ghasi mashine
+        setClientSummary(dummyData_clientSummary);
+    }, []);
     return (
         <section className="w-full flex-col flex-center mb-[64px]">
             <NetworkUsageGraph
@@ -20,36 +120,7 @@ const NetworkContent = () => {
                 title={"Network Usage"}
             />
             <ClientsSummary
-                clients={[
-                    {
-                        clientId: "C001",
-                        currentSpeed: "10 Mbps",
-                        status: "Active",
-                        ipAddress: "192.168.1.100",
-                        allocatedBW: "20 Mbps",
-                    },
-                    {
-                        clientId: "C002",
-                        currentSpeed: "5 Mbps",
-                        status: "Active",
-                        ipAddress: "192.168.1.101",
-                        allocatedBW: "10 Mbps",
-                    },
-                    {
-                        clientId: "C003",
-                        currentSpeed: "20 Mbps",
-                        status: "Idle",
-                        ipAddress: "192.168.1.102",
-                        allocatedBW: "25 Mbps",
-                    },
-                    {
-                        clientId: "C004",
-                        currentSpeed: "7 Mbps",
-                        status: "Active",
-                        ipAddress: "192.168.1.103",
-                        allocatedBW: "15 Mbps",
-                    },
-                ]}
+                clients={clientSummary}
                 inNetworkControl={true}
             />
             {/* Health Indicators */}
