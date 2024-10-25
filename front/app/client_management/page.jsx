@@ -6,6 +6,9 @@ import BandwidthMax from "@components/BandWidthMax";
 import NetworkUsageGraph from "@components/OurChart";
 import ClientSatisfaction from "@components/ClientSatisfaction";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import ClientSelector from "@components/ClientSelector";
+
+import { useState } from "react";
 
 // Sample data for the graph
 const data = Array.from({ length: 21 }, (_, i) => ({
@@ -15,6 +18,12 @@ const data = Array.from({ length: 21 }, (_, i) => ({
 
 // Separate the main content into its own component
 const DashboardContent = () => {
+    const [currentClient, setCurrentClient] = useState({
+        clientId: "C001",
+        status: "Active",
+        ipAddress: "192.168.1.100",
+        allocatedBW: 20,
+    });
     return (
         <section
             className="
@@ -27,22 +36,20 @@ const DashboardContent = () => {
     "
         >
             <NetworkUsageGraph data={data} title={"Usage Graph"} />
-            <OneClientSummary
+            {/* <OneClientSummary
                 client={{
                     clientId: "C001",
                     status: "Active",
                     ipAddress: "192.168.1.100",
                     allocatedBW: "20 Mbps",
                 }}
+            /> */}
+
+            <ClientSelector
+                currentClient={currentClient}
+                onClientSelect={setCurrentClient}
             />
-            <div className="flex flex-row justify-center">
-                <button
-                    id="logoutBtn"
-                    className="bg-[#4682B6] text-white hover:text-[#366295] hover:border-[#366295] mt-2 py-1 px-4 rounded mx-auto"
-                >
-                    Change Client
-                </button>
-            </div>
+            
             <div className="flex flex-row justify-between gap-3 my-3">
                 <div className="flex flex-col rounded-sm border-2 w-full border-[#4682B6]">
                     <h1 className="text-white text-center py-1 px-2">
