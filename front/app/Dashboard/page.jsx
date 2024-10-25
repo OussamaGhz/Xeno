@@ -1,8 +1,13 @@
-import NetworkUsage from "@components/NetworkUsage";
+import NetworkUsage from "@components/OurChart";
 import Cards from "@components/Cards";
 import Link from "next/link";
 import ClientsSummary from "@components/ClientsSummary";
 
+// Sample data for the graph
+const data = Array.from({ length: 21 }, (_, i) => ({
+    time: i,
+    usage: 5 + Math.sin(i * 0.5) * 2 + Math.random() * 1.5,
+}));
 const Page = () => {
     return (
         <section
@@ -10,9 +15,12 @@ const Page = () => {
         w-full
         flex-col
         flex-center
-
-      "
+    "
         >
+            <NetworkUsage
+                data={data}
+                title={"Network Usage"}
+            />
             <div className="flex flex-row justify-between gap-3 mb-3">
                 <Cards
                     title="Connected Clients"

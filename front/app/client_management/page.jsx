@@ -1,7 +1,15 @@
 import OneClientSummary from "@components/OneClientSummary";
 import ControlsCard from "@components/ControlsCard";
 import BandwidthMax from "@components/BandWidthMax";
+import NetworkUsageGraph from "@components/OurChart";
+import ClientSatisfaction from "@components/ClientSatisfaction";
 
+
+// Sample data for the graph
+const data = Array.from({ length: 21 }, (_, i) => ({
+    time: i,
+    usage: 5 + Math.sin(i * 0.5) * 2 + Math.random() * 1.5,
+}));
 const Page = () => {
     return (
         <section
@@ -13,6 +21,10 @@ const Page = () => {
       justify-center
     "
         >
+            <NetworkUsageGraph
+                data={data}
+                title={"Usage Graph"}
+            />
             <OneClientSummary
                 client={{
                     clientId: "C001",
@@ -83,6 +95,10 @@ const Page = () => {
                     </div>
                 </div>
             </div>
+            <ClientSatisfaction 
+                percentage={80} 
+                rating="Excellent" 
+            />
             {/* //! */}
             <div className="flex flex-row justify-between gap-3 my-3">
                 <ControlsCard

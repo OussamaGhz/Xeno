@@ -47,14 +47,7 @@ const SideBar = () => {
                     >
                         Network Control
                     </Link>
-                    <Link
-                        href="/data_visualisation"
-                        className={`text-white flex text-center justify-center items-center rounded-3xl py-1 px-2 ${
-                            pathname === "/data_visualisation" ? "active" : ""
-                        }`}
-                    >
-                        Data Visualization
-                    </Link>
+                    
                     <Link
                         href="/settings"
                         className={`text-white flex text-center justify-center items-center rounded-3xl py-1 px-2 ${
@@ -65,7 +58,7 @@ const SideBar = () => {
                     </Link>
                 </div>
                 <button
-                    id="logoutBtn"
+                    id="logintBtn"
                     className="bg-transparent text-[#4682B6] hover:text-[#366295] border-2 border-[#4682B6] hover:border-[#366295] font-bold py-2 px-4 rounded"
                 >
                     Log Out
