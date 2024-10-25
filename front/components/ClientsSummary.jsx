@@ -25,7 +25,6 @@ const ClientsSummary = ({ clients, inNetworkControl }) => {
                 <thead className="text-[#4682B6] font-light border-b-2 border-[#4682B6]">
                     <tr>
                         <th className="px-2 sm:px-4 py-2">Client ID</th>
-                        <th className="px-2 sm:px-4 py-2">Current Speed</th>
                         <th className="px-2 sm:px-4 py-2">Status</th>
                         <th className="px-2 sm:px-4 py-2">IP Address</th>
                         <th className="px-2 sm:px-4 py-2">Allocated BW</th>
@@ -39,20 +38,13 @@ const ClientsSummary = ({ clients, inNetworkControl }) => {
                                 index === clients.length - 1 ? "" : "border-b-2"
                             }`}
                         >
+                            <td className="px-2 sm:px-4 py-2">{client.id}</td>
                             <td className="px-2 sm:px-4 py-2">
-                                {client.clientId}
+                                Unknown
                             </td>
+                            <td className="px-2 sm:px-4 py-2">{client.ip}</td>
                             <td className="px-2 sm:px-4 py-2">
-                                {client.currentSpeed}
-                            </td>
-                            <td className="px-2 sm:px-4 py-2">
-                                {client.status}
-                            </td>
-                            <td className="px-2 sm:px-4 py-2">
-                                {client.ipAddress}
-                            </td>
-                            <td className="px-2 sm:px-4 py-2">
-                                {client.allocatedBW}
+                                {client.data[client.data.length - 1].bandwidth}
                             </td>
                         </tr>
                     ))}

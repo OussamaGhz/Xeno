@@ -2,27 +2,70 @@
 
 import React, { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 
-const NetworkUsageGraph = ({ data: initialData, title }) => {
+const NetworkUsageGraph = ({ data: clientData, title }) => {
     const [selectedPeriod, setSelectedPeriod] = useState("Today");
 
     // Format data based on selected period
     const formattedData = useMemo(() => {
+        // Find the earliest and latest timestamps
+        const timestamps = clientData.flatMap(client => 
+            client.data.map(d => new Date(d.timestamp))
+        );
+        const minTime = Math.min(...timestamps.map(t => t.getTime()));
+        const maxTime = Math.max(...timestamps.map(t => t.getTime()));
+
+        // Create a map to store aggregated bandwidth usage
+        const timeMap = new Map();
+
         if (selectedPeriod === "Today") {
-            return Array.from({ length: 24 }, (_, i) => ({
-                time: `${i.toString().padStart(2, '0')}:00`,
-                usage: 5 + Math.sin(i * 0.5) * 2 + Math.random() * 1.5,
-            }));
+            // Group data by hour for today's view
+            clientData.forEach(client => {
+                client.data.forEach(dataPoint => {
+                    const date = new Date(dataPoint.timestamp);
+                    const hour = date.getHours();
+                    const hourKey = `${hour.toString().padStart(2, '0')}:00`;
+                    
+                    const currentTotal = timeMap.get(hourKey) || 0;
+                    timeMap.set(hourKey, currentTotal + dataPoint.bandwidth);
+                });
+            });
+
+            // Fill in missing hours with 0
+            return Array.from({ length: 24 }, (_, i) => {
+                const hourKey = `${i.toString().padStart(2, '0')}:00`;
+                return {
+                    time: hourKey,
+                    usage: timeMap.get(hourKey) || 0
+                };
+            });
         } else {
-            // Week view - 7 days
+            // Group data by day for week view
             const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            return Array.from({ length: 7 }, (_, i) => ({
-                time: days[i],
-                usage: 5 + Math.sin(i * 0.5) * 2 + Math.random() * 1.5,
+            clientData.forEach(client => {
+                client.data.forEach(dataPoint => {
+                    const date = new Date(dataPoint.timestamp);
+                    const dayName = days[date.getDay()];
+                    
+                    const currentTotal = timeMap.get(dayName) || 0;
+                    timeMap.set(dayName, currentTotal + dataPoint.bandwidth);
+                });
+            });
+
+            // Create array with all days
+            return days.map(day => ({
+                time: day,
+                usage: timeMap.get(day) || 0
             }));
         }
-    }, [selectedPeriod]);
+    }, [clientData, selectedPeriod]);
+
+    // Calculate max usage for Y-axis domain
+    const maxUsage = useMemo(() => {
+        const max = Math.max(...formattedData.map(d => d.usage));
+        return Math.ceil(max / 10) * 10; // Round up to nearest 10
+    }, [formattedData]);
 
     // Time period buttons component
     const TimePeriodButtons = ({ value, onChange }) => (
@@ -86,8 +129,15 @@ const NetworkUsageGraph = ({ data: initialData, title }) => {
                             <YAxis
                                 stroke="#6B7280"
                                 tick={{ fill: "#6B7280" }}
-                                domain={[0, 10]}
-                                ticks={[0, 2, 4, 6, 8, 10]}
+                                domain={[0, maxUsage]}
+                                ticks={Array.from({ length: 6 }, (_, i) => (maxUsage / 5) * i)}
+                            />
+                            <Tooltip 
+                                contentStyle={{ 
+                                    backgroundColor: '#292E30',
+                                    border: '1px solid #4682B6',
+                                    color: 'white'
+                                }}
                             />
                             <Area
                                 type="monotone"
@@ -95,6 +145,7 @@ const NetworkUsageGraph = ({ data: initialData, title }) => {
                                 stroke="#60A5FA"
                                 fillOpacity={1}
                                 fill="url(#networkGradient)"
+                                name="Bandwidth Usage (Mbps)"
                             />
                         </AreaChart>
                     </ResponsiveContainer>

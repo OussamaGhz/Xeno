@@ -2,8 +2,10 @@
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Alert } from "@/components/ui/alert";
+import ProtectedRoute from '@/components/ProtectedRoute';
 
-const Page = () => {
+// Separate the main content into its own component
+const SettingsContent = () => {
     // User account states
     const [username, setUsername] = useState("Hadj Aissa");
     const [email, setEmail] = useState("hadjaisaa@gmail.com");
@@ -222,6 +224,15 @@ const Page = () => {
                 </DialogContent>
             </Dialog>
         </section>
+    );
+};
+
+// Wrap the page with ProtectedRoute
+const Page = () => {
+    return (
+        <ProtectedRoute>
+            <SettingsContent />
+        </ProtectedRoute>
     );
 };
 

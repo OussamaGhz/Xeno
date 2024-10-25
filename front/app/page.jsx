@@ -4,17 +4,18 @@ import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../contexts/AuthContext";
 import logo from "../public/logo.png";
 
 const LoginPage = () => {
     const router = useRouter();
+    const { setIsLoggedIn } = useAuth();
     const [showPassword, setShowPassword] = useState(false);
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
-    // Email validation regex
     const emailRegex =
         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
@@ -63,16 +64,12 @@ const LoginPage = () => {
                 throw new Error(data.message || "Login failed");
             }
 
-            // If login successful:
-            // 1. Store the token if your API returns one
-            if (data.token) {
-                localStorage.setItem("token", data.token);
-            }
-            if (data.refreshToken) {
-                localStorage.setItem("refreshToken", data.refreshToken);
-            }
+            // Set logged in status to true
+            setIsLoggedIn(true);
+            //store it in the local storage
+            localStorage.setItem('isLoggedIn', '1');
 
-            // 2. Redirect to dashboard
+            // Redirect to dashboard
             router.push("/Dashboard");
         } catch (err) {
             setError(err.message || "An error occurred during login");
