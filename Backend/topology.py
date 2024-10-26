@@ -7,6 +7,7 @@ import time
 import re
 from datetime import datetime
 import sqlite3
+import random
 
 # Dictionary to store link objects
 links = {}
@@ -56,8 +57,9 @@ def customTopology():
 
     # Add hosts
     server = net.addHost("server", ip="10.0.0.1/24")  # Server simulating the ISP
-    client1 = net.addHost("client1", ip="10.0.1.1/24")  # Client1 with its own subnet
-    client2 = net.addHost("client2", ip="10.0.2.1/24")  # Client2 with its own subnet
+    clients = []
+    for i in range(1, 11):
+        clients.append(net.addHost(f"client{i}", ip=f"10.0.{i}.1/24"))  # Clients with their own subnets
 
     # Add router
     router = net.addHost(
@@ -65,16 +67,14 @@ def customTopology():
     )  # Router to manage traffic between server and clients
 
     # Add links with initial bandwidth constraints
-    net.addLink(server, router, bw=100)  # High bandwidth between server and router
-    link1 = net.addLink(router, client1, bw=initial_bw) 
-    link2 = net.addLink(router, client2, bw=initial_bw)  
-
-    # Store links and max bandwidths in the dictionaries
-    links["client1"] = link1
-    links["client2"] = link2
-    max_bandwidths["client1"] = initial_bw
-    max_bandwidths["client2"] = initial_bw
-
+    net.addLink(server, router, bw=1000)  # High bandwidth between server and router
+    for i, client in enumerate(clients, start=1):
+        link = net.addLink(router, client, bw=initial_bw)
+        links[f"client{i}"] = link
+        # get random number between 0 and 20000
+        random_max_bw = random.uniform(0, 3000)
+        print(f"random_max_bw sdfsdfsdfsdf: {random_max_bw}")
+        max_bandwidths[f"client{i}"] = random_max_bw
     # Start the network
     net.start()
 
@@ -85,17 +85,15 @@ def customTopology():
     router.cmd(
         "ifconfig router-eth0 10.0.0.254 netmask 255.255.255.0"
     )  # Link to server
-    router.cmd(
-        "ifconfig router-eth1 10.0.1.254 netmask 255.255.255.0"
-    )  # Link to client1
-    router.cmd(
-        "ifconfig router-eth2 10.0.2.254 netmask 255.255.255.0"
-    )  # Link to client2
+    for i in range(1, 11):
+        router.cmd(
+            f"ifconfig router-eth{i} 10.0.{i}.254 netmask 255.255.255.0"
+        )  # Links to clients
 
     # Set default gateways for clients and server
     server.cmd("route add default gw 10.0.0.254")
-    client1.cmd("route add default gw 10.0.1.254")
-    client2.cmd("route add default gw 10.0.2.254")
+    for i, client in enumerate(clients, start=1):
+        client.cmd(f"route add default gw 10.0.{i}.254")
 
     # Test connectivity
     print("Testing network connectivity")
@@ -106,11 +104,11 @@ def customTopology():
 
     # Insert initial bandwidth data into the database
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    insert_bandwidth_data("client1", client1.IP(), initial_bw, initial_bw, timestamp)
-    insert_bandwidth_data("client2", client2.IP(), initial_bw, initial_bw, timestamp)
+    for i, client in enumerate(clients, start=1):
+        insert_bandwidth_data(f"client{i}", client.IP(), initial_bw, initial_bw, timestamp)
 
     # Return network and link objects for further manipulation
-    return net, server, client1, client2, link1, link2
+    return net, server, clients
 
 
 # Step 2: Monitor the bandwidth between client and server
@@ -186,29 +184,16 @@ def runSimulation():
     setup_database()
 
     # Create the network topology
-    net, server, client1, client2, link1, link2 = customTopology()
+    net, server, clients = customTopology()
 
     # Step 6: Start monitoring bandwidth in separate threads
-    threading.Thread(
-        target=monitorBandwidth, args=(client1, server, 5), daemon=True
-    ).start()
-    threading.Thread(
-        target=monitorBandwidth, args=(client2, server, 5), daemon=True
-    ).start()
+    for client in clients:
+        threading.Thread(
+            target=monitorBandwidth, args=(client, server, 5), daemon=True
+        ).start()
 
     # Simulate changing bandwidth for clients dynamically
-    time.sleep(10)
-    print("Changing Client1's bandwidth to 10 Mbps")
-    setCustomBandwidth(
-        link1, 40, "client1-eth0", "router-eth1"
-    )  # Change Client1's bandwidth to 10 Mbps
-
-    time.sleep(10)
-    print("Changing Client2's bandwidth to 5 Mbps")
-    setCustomBandwidth(
-        link2, 40, "client2-eth0", "router-eth2"
-    )  # Change Client2's bandwidth to 5 Mbps
-
+    
     # Step 7: Start the Mininet CLI for manual testing
     startCLI(net)
 

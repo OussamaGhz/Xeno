@@ -194,6 +194,9 @@ class SatelliteBandwidthEnv(gym.Env):
         self.time_step += 1
         done = self.time_step >= (len(self.data) // self.num_users)
         
+        # Print the optimized bandwidth for each user
+        print(f"Time Step {self.time_step} - Optimized Bandwidth: {self.state[:, 3]}")
+
         return self.state, reward, done, {}
 
     def calculate_ratio(self):
@@ -296,6 +299,8 @@ test_df = pd.read_csv('optim_train_set.csv', sep=',')  # Use the correct delimit
 # Convert 'Date' column to datetime and then to Unix timestamp
 test_df['Date'] = pd.to_datetime(test_df['Date'])
 test_df = test_df.sort_values('Date')  # Sort by date if necessary
+# exoprt sorted data
+test_df.to_csv('sorted_test_data.csv', index=False)
 
 # Initialize the testing environment with the processed test dataset
 test_env = SatelliteBandwidthEnv(data=test_df)
