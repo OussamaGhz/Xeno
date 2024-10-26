@@ -15,8 +15,12 @@ class SatelliteBandwidthEnv(gym.Env):
         self.state = np.zeros((self.num_users, 7))
         self.time_step = 0
 
+        # Variables to calculate the average efficiency
         self.R_efficiency_avg=0
         self.N=0
+        # Variables to calculate the ratio
+        self.ratio=0
+        self.M=0
 
         # Penalty coefficients
         self.penalty_coefficient_over = 3
@@ -26,8 +30,8 @@ class SatelliteBandwidthEnv(gym.Env):
         # Initialize abuse counters
         self.abuse_counters = np.zeros(self.num_users)  # Abuse counters for each user
 
-        # Define observation and action spaces
-        self.observation_space = spaces.Box(low=0, high=np.inf, shape=(self.num_users, 7), dtype=np.float32)
+        # Define state and action spaces
+        self.state_space = spaces.Box(low=0, high=np.inf, shape=(self.num_users, 7), dtype=np.float32)
         self.action_space = spaces.Box(low=cir, high=total_bandwidth, shape=(self.num_users,), dtype=np.float32)
 
     def reset(self, time_step=0):
@@ -40,7 +44,6 @@ class SatelliteBandwidthEnv(gym.Env):
 
         # Set Device ID (DID) as integers
         self.state[:, 0] = current_data['DID'].astype(int).values
-        print("DID:", self.state[:, 0].astype(int))
 
         # Convert 'Date' to datetime format if it's in string format
         if current_data['Date'].dtype == 'object':
@@ -108,16 +111,39 @@ class SatelliteBandwidthEnv(gym.Env):
         
         # Calculate the reward and update time step
         reward = self.calculate_reward()
+        self.ratio += self.calculate_ratio()
+        # print('users : ',self.ratio)
         self.time_step += 1
         done = self.time_step >= (len(self.data) // self.num_users)
         
         return self.state, reward, done, {}
+
+    def calculate_ratio(self):
+            """Calculates the ratio at each time step."""
+            ratio_scores = []
+            
+            for i in range(self.num_users):
+                requested_bandwidth = self.state[i, 2]  # BW requested
+                mir = self.state[i, 5]  # MIR
+                
+                if requested_bandwidth >= mir:
+                    ratioN = mir / requested_bandwidth if requested_bandwidth > 0 else 0
+                else:
+                    ratioN = 1  # Full satisfaction
+                # print('first : ',ratioN)
+                ratio_scores.append(ratioN)
+            
+            ratioN = np.sum(ratio_scores)
+            print('Sum : ',ratioN)
+            return ratioN
 
     def calculate_reward(self):
             """Calculates the total reward at each time step."""
             R_efficiency = self.calculate_efficiency_reward()
             P_over = self.calculate_over_allocation_penalty()
             P_abusive = self.calculate_abusive_usage_penalty(288)
+            
+            # Calculate Average Efficiency
             self.R_efficiency_avg += R_efficiency
             self.N += 1
             
@@ -198,22 +224,25 @@ model = PPO.load("RL/ppo_satellite_bandwidth")
 # Reset the environment to start a new episode
 obs = test_env.reset(time_step=0)
 
-print("Testing the trained agent...\n")
+print("Training the agent...\n")
 
 # Run a simple episode and print rewards for a specified number of steps
 for i in range(1000):  # Change the number of steps if needed
     action, _states = model.predict(obs[:, :5])  # Predict action from the model
     obs, reward, done, info = test_env.step(action)  # Take action in the environment
-    print(f"Step {i} - Reward: {reward:.2f}")
-    # average effiency
+    # print(f"Step {i} - Reward: {reward:.2f}")
 
     # Check if the episode is done
     if done:
         print("Episode finished!")
         break
 
-print(test_env.R_efficiency_avg/test_env.N)
+# Calculate and print average efficiency
+print("Average Efficiency:", test_env.R_efficiency_avg / test_env.N)
 
+print("step",test_env.time_step,"num users",test_env.num_users)
+# Calculate and print average ratio
+print("Average Ratio:", test_env.ratio / (test_env.time_step*test_env.num_users))
 
 
 
@@ -222,7 +251,7 @@ print(test_env.R_efficiency_avg/test_env.N)
 
 # Load and preprocess your test data
 test_df = pd.read_csv('RL/test_data.csv', sep=';')  # Use the correct delimiter ';'
-print(test_df)
+
 # Convert 'Date' column to datetime and then to Unix timestamp
 test_df['Date'] = pd.to_datetime(test_df['Date'], format='%d/%m/%Y %H:%M')
 test_df = test_df.sort_values('Date')  # Sort by date if necessary
@@ -242,7 +271,7 @@ print("Testing the trained agent...\n")
 for i in range(1000):  # Adjust number of steps if needed
     action, _states = model.predict(obs[:, :5])  # Predict action from the model
     obs, reward, done, info = test_env.step(action)  # Take action in the environment
-    print(f"Step {i} - Reward: {reward:.2f}")
+    # print(f"Step {i} - Reward: {reward:.2f}")
 
     # Check if the episode is done
     if done:
@@ -251,3 +280,7 @@ for i in range(1000):  # Adjust number of steps if needed
 
 # Calculate and print average efficiency
 print("Average Efficiency:", test_env.R_efficiency_avg / test_env.N)
+
+print("step",test_env.time_step,"num users",test_env.num_users)
+# Calculate and print average ratio
+print("Average Ratio:", test_env.ratio / (test_env.time_step*test_env.num_users))
