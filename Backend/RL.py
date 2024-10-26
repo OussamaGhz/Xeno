@@ -413,7 +413,7 @@ def run_optimization():
                 {
                     "DID": get_id(client["id"]),
                     "Date": latest_record["timestamp"],
-                    "BW_REQUESTED": latest_record["bandwidth"],
+                    "BW_REQUESTED": latest_record["bandwidth"] * 1000,  # Convert Mb to Kb
                 }
             )
 
@@ -445,9 +445,12 @@ def run_optimization():
     # Extract the optimized bandwidth from the environment state
     optimized_bandwidth = test_env.state[:, 3]
 
+    # Convert the optimized bandwidth back to megabits (Mb)
+    optimized_bandwidth_mb = optimized_bandwidth / 1000
+
     # Set new bandwidth for each client using the /api/set_bandwidth endpoint
     for i, client in enumerate(df["DID"]):
-        payload = {"client": "client" + str(client), "bandwidth": optimized_bandwidth[i]}
+        payload = {"client": "client" + str(client), "bandwidth": optimized_bandwidth_mb[i]}
         response = requests.post("http://localhost:5000/api/set_bandwidth", json=payload)
         print(f"Set bandwidth for client {client}: {response.json()}")
 

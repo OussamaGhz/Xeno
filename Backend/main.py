@@ -263,7 +263,7 @@ def delete_records():
 
 def run_flask():
     setup_database()  # Ensure the database is set up
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5001)
 
 
 if __name__ == "__main__":

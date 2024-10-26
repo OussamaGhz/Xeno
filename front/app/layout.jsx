@@ -1,6 +1,6 @@
 import "@styles/globals.css";
 import Nav from "@components/Nav";
-import SideBar from "@components/sideBar";
+import SideBar from "@components/SideBar";
 ``;
 import SmallSideBar from "@components/SmallSideBar";
 import { AuthProvider } from "../contexts/AuthContext";
