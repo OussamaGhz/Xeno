@@ -2,24 +2,37 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
+const getFormattedTimestamp = () => {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+};
+
 const BandwidthMax = ({ currentClient }) => {
     const [bandwidthMax, setBandwidthMax] = useState(20);
 
     const updateSliderValue = (value) => {
         setBandwidthMax(value);
+        console.log("Applying bandwidth max:", bandwidthMax);
     };
 
     const applyBandwidthMax = () => {
         console.log("Applying bandwidth max:", bandwidthMax);
-        console.log("Current client:", currentClient);
+        console.log("Current client:", currentClient.clientId);
 
         axios
             .post(`http://127.0.0.1:5001/api/bandwidth`, {
-                client: currentClient.id,
-                ip: currentClient.ip,
+                client: `${currentClient.clientId}`,
+                ip: currentClient.ipAddress,
                 bandwidth: bandwidthMax,
                 max_bandwidth: bandwidthMax,
-                timestamp: "2024-10-19 13:02:00",
+                timestamp: getFormattedTimestamp(),
             })
             .then((response) => {
                 console.log(

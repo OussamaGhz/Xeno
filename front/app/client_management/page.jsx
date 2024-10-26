@@ -188,12 +188,16 @@ const DashboardContent = () => {
                         title: "Control CIR",
                         amount: 20,
                     }}
+                    currentClient={currentClient}
+                    setCurrentClient={setCurrentClient}
                 />
                 <ControlsCard
                     controle={{
                         title: "Control MIR",
                         amount: 19.4,
                     }}
+                    currentClient={currentClient}
+                    setCurrentClient={setCurrentClient}
                 />
             </div>
             <div className="flex flex-col rounded-sm mb-3 border-2 w-full border-[#4682B6]">
