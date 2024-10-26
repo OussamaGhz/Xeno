@@ -10,7 +10,6 @@ Flask-Cors==5.0.0
 idna==3.10
 itsdangerous==2.2.0
 Jinja2==3.1.4
-MarkupSafe==3.0.1
 mininet==2.3.0.dev6
 ovs==3.4.0
 requests==2.32.3
