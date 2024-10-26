@@ -4,6 +4,8 @@
 
 1. [RL Documentation](#rl-documentation)
 2. [Mininet Installation Guide](#mininet-installation-guide)
+1. [RL Documentation](#rl-documentation)
+2. [Mininet Installation Guide](#mininet-installation-guide)
 3. [Frontend Documentation](#frontend-documentation)
 4. [API Documentation](#api-documentation)
 5. [Topology and Simulation Explanation](#topology-and-simulation-explanation)
@@ -16,6 +18,8 @@
 ### Prerequisites
 
 - **Python 3.7+**: Ensure Python is installed on your system.
+- **Linux**: Ensure you have a Linux ditro installed in your system.
+
 
 ### Installation Steps
 
@@ -44,6 +48,12 @@
     Start the Flask server using the following command:
     ```bash
     sudo python main.py
+    ```
+
+6. **Run the RL Model**:
+    Start the Flask server using the following command:
+    ```bash
+    python RL.py
     ```
 
 Your backend should now be accessible at `http://localhost:5000`.
@@ -151,6 +161,7 @@ Your frontend should now be accessible at `http://localhost:3000`.
 
 ---
 
+## API Documentation
 ## API Documentation
 
 ### Endpoints

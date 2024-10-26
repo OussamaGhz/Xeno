@@ -189,7 +189,7 @@ def runSimulation():
     # Step 6: Start monitoring bandwidth in separate threads
     for client in clients:
         threading.Thread(
-            target=monitorBandwidth, args=(client, server, 5), daemon=True
+            target=monitorBandwidth, args=(client, server, 10), daemon=True
         ).start()
 
     # Simulate changing bandwidth for clients dynamically
