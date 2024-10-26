@@ -18,6 +18,8 @@
 ### Prerequisites
 
 - **Python 3.7+**: Ensure Python is installed on your system.
+- **Linux**: Ensure you have a Linux ditro installed in your system.
+
 
 ### Installation Steps
 
