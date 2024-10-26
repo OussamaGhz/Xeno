@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { use } from "react";
 import OneClientSummary from "@components/OneClientSummary";
 import ControlsCard from "@components/ControlsCard";
 import BandwidthMax from "@components/BandWidthMax";
@@ -8,123 +8,105 @@ import ClientSatisfaction from "@components/ClientSatisfaction";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ClientSelector from "@components/ClientSelector";
 
-import { useState,useEffect } from "react";
+import axios from "axios";
 
-// Sample data for the graph
-// const data = Array.from({ length: 21 }, (_, i) => ({
-//     time: i,
-//     usage: 5 + Math.sin(i * 0.5) * 2 + Math.random() * 1.5,
-// }));
-
-const dummyData_clientSummary = [
-    {
-        id: "client1",
-        ip: "192.168.1.1",
-        max_bandwidth: 10,
-        data: [
-            { bandwidth: 5, timestamp: "2024-10-19 12:00:00" },
-            { bandwidth: 7, timestamp: "2024-10-19 12:01:00" },
-        ],
-    },
-    {
-        id: "client2",
-        ip: "192.168.1.2",
-        max_bandwidth: 20,
-        data: [{ bandwidth: 15, timestamp: "2024-10-19 12:00:00" }],
-    },
-    {
-        id: "client3",
-        ip: "192.168.1.3",
-        max_bandwidth: 15,
-        data: [
-            { bandwidth: 8, timestamp: "2024-10-19 12:00:00" },
-            { bandwidth: 10, timestamp: "2024-10-19 12:02:00" },
-        ],
-    },
-    {
-        id: "client4",
-        ip: "192.168.1.4",
-        max_bandwidth: 25,
-        data: [
-            { bandwidth: 20, timestamp: "2024-10-19 12:00:00" },
-            { bandwidth: 18, timestamp: "2024-10-19 12:03:00" },
-        ],
-    },
-    {
-        id: "client5",
-        ip: "192.168.1.5",
-        max_bandwidth: 12,
-        data: [
-            { bandwidth: 6, timestamp: "2024-10-19 12:00:00" },
-            { bandwidth: 9, timestamp: "2024-10-19 12:01:00" },
-        ],
-    },
-    {
-        id: "client6",
-        ip: "192.168.1.6",
-        max_bandwidth: 18,
-        data: [
-            { bandwidth: 12, timestamp: "2024-10-19 12:00:00" },
-            { bandwidth: 16, timestamp: "2024-10-19 12:02:00" },
-        ],
-    },
-    {
-        id: "client7",
-        ip: "192.168.1.7",
-        max_bandwidth: 22,
-        data: [
-            { bandwidth: 18, timestamp: "2024-10-19 12:00:00" },
-            { bandwidth: 20, timestamp: "2024-10-19 12:01:00" },
-        ],
-    },
-    {
-        id: "client8",
-        ip: "192.168.1.8",
-        max_bandwidth: 30,
-        data: [{ bandwidth: 25, timestamp: "2024-10-19 12:00:00" }],
-    },
-    {
-        id: "client9",
-        ip: "192.168.1.9",
-        max_bandwidth: 14,
-        data: [
-            { bandwidth: 10, timestamp: "2024-10-19 12:00:00" },
-            { bandwidth: 13, timestamp: "2024-10-19 12:02:00" },
-        ],
-    },
-    {
-        id: "client10",
-        ip: "192.168.1.10",
-        max_bandwidth: 16,
-        data: [
-            { bandwidth: 11, timestamp: "2024-10-19 12:00:00" },
-            { bandwidth: 14, timestamp: "2024-10-19 12:01:00" },
-        ],
-    },
-];
+import { useState, useEffect } from "react";
 
 // Separate the main content into its own component
+
+function findPeakBandwidth(data) {
+    if (!Array.isArray(data) || data.length === 0) {
+        return {
+            maxBandwidth: 0,
+            hour: "No data",
+        };
+    }
+
+    const result = data.reduce(
+        (max, current) => {
+            if (current.bandwidth > max.maxBandwidth) {
+                return {
+                    maxBandwidth: current.bandwidth,
+                    hour: current.timestamp.substring(11, 16), // Extract HH:MM from timestamp
+                };
+            }
+            return max;
+        },
+        { maxBandwidth: -Infinity, hour: "" },
+    );
+
+    return {
+        maxBandwidth: Number(result.maxBandwidth.toFixed(2)),
+        hour: result.hour,
+    };
+}
+
+function calculateAverageBandwidth(data) {
+    if (!Array.isArray(data) || data.length === 0) {
+        return 0; // Return 0 if data is empty or invalid
+    }
+
+    const totalBandwidth = data.reduce((sum, item) => sum + item.bandwidth, 0);
+    const averageBandwidth = totalBandwidth / data.length;
+
+    return Number(averageBandwidth.toFixed(2)); // Round to 2 decimal places
+}
+
 const DashboardContent = () => {
     const [listClients, setListClients] = useState([]);
     const [currentClient, setCurrentClient] = useState({
-        clientId: "C001",
-        status: "Active",
-        ipAddress: "192.168.1.100",
+        clientId: "-",
+        status: "-",
+        ipAddress: "-",
         allocatedBW: 20,
     });
+    const [clientData, setClientData] = useState([]);
+    const [peakBandwidth, setPeakBandwidth] = useState({
+        maxBandwidth: 0,
+        hour: "No data",
+    });
+
     const fetchData = async () => {
         try {
-            const response = await axios.get("http://localhost:3000/api/all");
-            setListClients(response);
+            const response = await axios.get("http://127.0.0.1:5001/api/all");
+            setListClients(response.data);
+            console.log("response = ", response.data);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+    const fetchClientData = async () => {
+        try {
+            if (currentClient.clientId === "-") {
+                return;
+            }
+            const response = await axios.get(
+                `http://127.0.0.1:5001/api/client/${currentClient.clientId}`,
+            );
+            console.log("response = ", response.data);
+            setClientData(response.data.data);
         } catch (error) {
             console.log(error);
         }
     };
 
     useEffect(() => {
-        // fetchData();//todo activate this line in ghasi mashine
-        setListClients(dummyData_clientSummary);
+        fetchData(); //todo activate this line in ghasi mashine
     }, []);
+    useEffect(() => {
+        setCurrentClient({
+            clientId: listClients[0]?.id,
+            status: "Active",
+            ipAddress: listClients[0]?.ip,
+            allocatedBW: listClients[0]?.max_bandwidth,
+        });
+    }, [listClients]);
+    useEffect(() => {
+        fetchClientData();
+    }, [currentClient]);
+    useEffect(() => {
+        setPeakBandwidth(findPeakBandwidth(clientData));
+    }, [currentClient]);
 
     return (
         <section
@@ -138,21 +120,13 @@ const DashboardContent = () => {
     "
         >
             <NetworkUsageGraph data={listClients} title={"Usage Graph"} />
-            {/* <OneClientSummary
-                client={{
-                    clientId: "C001",
-                    status: "Active",
-                    ipAddress: "192.168.1.100",
-                    allocatedBW: "20 Mbps",
-                }}
-            /> */}
 
             <ClientSelector
                 currentClient={currentClient}
                 onClientSelect={setCurrentClient}
                 clients={listClients}
             />
-            
+
             <div className="flex flex-row justify-between gap-3 my-3">
                 <div className="flex flex-col rounded-sm border-2 w-full border-[#4682B6]">
                     <h1 className="text-white text-center py-1 px-2">
@@ -162,7 +136,8 @@ const DashboardContent = () => {
                         <div className="flex flex-col py-1 px-2">
                             <div>
                                 <span className="text-[#4682B6] font-bold text-4xl sm:text-5xl">
-                                    10:03
+                                    {/* {peakBandwidth.hour} */}
+                                    {findPeakBandwidth(clientData).hour}
                                 </span>
                             </div>
                             <div className="text-gray-400 text-xs sm:text-sm">
@@ -172,7 +147,8 @@ const DashboardContent = () => {
                         <div className="flex flex-col py-1 px-2">
                             <div>
                                 <span className="text-[#4682B6] font-bold text-4xl sm:text-5xl">
-                                    17
+                                    {/* {peakBandwidth.maxBandwidth} */}
+                                    {findPeakBandwidth(clientData).maxBandwidth}
                                 </span>
                                 <span className="text-white text-xl sm:text-2xl ml-1">
                                     Mbps
@@ -192,7 +168,7 @@ const DashboardContent = () => {
                         <div className="flex flex-col py-1 px-2">
                             <div>
                                 <span className="text-[#4682B6] font-bold text-4xl sm:text-5xl">
-                                    13.4
+                                    {calculateAverageBandwidth(clientData)}
                                 </span>
                                 <span className="text-white text-xl sm:text-2xl ml-1">
                                     Mbps
@@ -249,7 +225,10 @@ const DashboardContent = () => {
                     Test Again
                 </button>
             </div>
-            <BandwidthMax />
+            <BandwidthMax
+                currentClient={currentClient}
+                setCurrentClient={setCurrentClient}
+            />
         </section>
     );
 };

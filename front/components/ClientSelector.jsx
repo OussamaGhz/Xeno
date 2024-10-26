@@ -3,60 +3,6 @@ import React, { useState } from "react";
 const ClientSelector = ({ currentClient, onClientSelect,clients }) => {
     const [isOpen, setIsOpen] = useState(false);
 
-    // Sample data - replace with your actual data source
-    // const clients = [
-    //     { id: "client1", status: "Unknown", ip: "192.168.1.1", allocatedBW: 7 },
-    //     {
-    //         id: "client2",
-    //         status: "Unknown",
-    //         ip: "192.168.1.2",
-    //         allocatedBW: 15,
-    //     },
-    //     {
-    //         id: "client3",
-    //         status: "Unknown",
-    //         ip: "192.168.1.3",
-    //         allocatedBW: 10,
-    //     },
-    //     {
-    //         id: "client4",
-    //         status: "Unknown",
-    //         ip: "192.168.1.4",
-    //         allocatedBW: 18,
-    //     },
-    //     { id: "client5", status: "Unknown", ip: "192.168.1.5", allocatedBW: 9 },
-    //     {
-    //         id: "client6",
-    //         status: "Unknown",
-    //         ip: "192.168.1.6",
-    //         allocatedBW: 16,
-    //     },
-    //     {
-    //         id: "client7",
-    //         status: "Unknown",
-    //         ip: "192.168.1.7",
-    //         allocatedBW: 20,
-    //     },
-    //     {
-    //         id: "client8",
-    //         status: "Unknown",
-    //         ip: "192.168.1.8",
-    //         allocatedBW: 25,
-    //     },
-    //     {
-    //         id: "client9",
-    //         status: "Unknown",
-    //         ip: "192.168.1.9",
-    //         allocatedBW: 13,
-    //     },
-    //     {
-    //         id: "client10",
-    //         status: "Unknown",
-    //         ip: "192.168.1.10",
-    //         allocatedBW: 14,
-    //     },
-    // ];
-
     const handleClientSelect = (client) => {
         onClientSelect(client);
         setIsOpen(false);
@@ -245,7 +191,7 @@ rounded-sm border-[#4682B6]"
                                                     {client.ip}
                                                 </td>
                                                 <td className="px-4 py-2">
-                                                    {client.allocatedBW} Mbps
+                                                    {client.data[client.data.length - 1].bandwidth} Mbps
                                                 </td>
                                                 <td className="px-4 py-2 text-right">
                                                     <button className="text-[#4682B6] hover:text-blue-700">

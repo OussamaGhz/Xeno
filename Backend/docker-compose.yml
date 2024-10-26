@@ -1,0 +1,20 @@
+services:
+  mininet:
+    build:
+      context: .
+      platforms:
+        - linux/arm64
+    platform: linux/arm64
+    privileged: true
+    volumes:
+      - .:/app
+      - /lib/modules:/lib/modules:ro
+    environment:
+      - DOCKER_DEFAULT_PLATFORM=linux/arm64
+    ports:
+      - "5001:5000"
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined

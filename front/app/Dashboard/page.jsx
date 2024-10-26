@@ -50,7 +50,7 @@ function findPeakBandwidth(clients) {
     clients.forEach(client => {
         client.data.forEach(record => {
             // Extract hour from timestamp
-            const hour = record.timestamp.substring(0, 13) + ":00:00";
+            const hour = record.timestamp?.substring(0, 13) + ":00:00";
             
             // Add bandwidth to hourly sum
             if (!hourlyBandwidth.has(hour)) {
@@ -77,104 +77,6 @@ function findPeakBandwidth(clients) {
         hourlyBreakdown: Object.fromEntries(hourlyBandwidth)
     };
 }
-
-// Sample data for the graph
-// const data = Array.from({ length: 21 }, (_, i) => ({
-//     time: i,
-//     usage: 5 + Math.sin(i * 0.5) * 2 + Math.random() * 1.5,
-// }));
-
-const dummyData_clientSummary = [
-    {
-        id: "client1",
-        ip: "192.168.1.1",
-        max_bandwidth: 10,
-        data: [
-            { bandwidth: 5, timestamp: "2024-10-19 12:00:00" },
-            { bandwidth: 7, timestamp: "2024-10-19 12:01:00" },
-        ],
-    },
-    {
-        id: "client2",
-        ip: "192.168.1.2",
-        max_bandwidth: 20,
-        data: [
-            { bandwidth: 15, timestamp: "2024-10-19 8:00:00" },
-            { bandwidth: 15, timestamp: "2024-10-19 8:00:00" },
-            { bandwidth: 15, timestamp: "2024-10-19 8:00:00" },
-
-        ],
-    },
-    {
-        id: "client3",
-        ip: "192.168.1.3",
-        max_bandwidth: 15,
-        data: [
-            { bandwidth: 8, timestamp: "2024-10-19 12:00:00" },
-            { bandwidth: 10, timestamp: "2024-10-19 12:02:00" },
-        ],
-    },
-    {
-        id: "client4",
-        ip: "192.168.1.4",
-        max_bandwidth: 25,
-        data: [
-            { bandwidth: 20, timestamp: "2024-10-19 12:00:00" },
-            { bandwidth: 18, timestamp: "2024-10-19 12:03:00" },
-        ],
-    },
-    {
-        id: "client5",
-        ip: "192.168.1.5",
-        max_bandwidth: 12,
-        data: [
-            { bandwidth: 6, timestamp: "2024-10-19 12:00:00" },
-            { bandwidth: 9, timestamp: "2024-10-19 12:01:00" },
-        ],
-    },
-    {
-        id: "client6",
-        ip: "192.168.1.6",
-        max_bandwidth: 18,
-        data: [
-            { bandwidth: 12, timestamp: "2024-10-19 12:00:00" },
-            { bandwidth: 16, timestamp: "2024-10-19 12:02:00" },
-        ],
-    },
-    {
-        id: "client7",
-        ip: "192.168.1.7",
-        max_bandwidth: 22,
-        data: [
-            { bandwidth: 18, timestamp: "2024-10-19 12:00:00" },
-            { bandwidth: 20, timestamp: "2024-10-19 12:01:00" },
-        ],
-    },
-    {
-        id: "client8",
-        ip: "192.168.1.8",
-        max_bandwidth: 30,
-        data: [{ bandwidth: 25, timestamp: "2024-10-19 12:00:00" }],
-    },
-    {
-        id: "client9",
-        ip: "192.168.1.9",
-        max_bandwidth: 14,
-        data: [
-            { bandwidth: 10, timestamp: "2024-10-19 12:00:00" },
-            { bandwidth: 13, timestamp: "2024-10-19 12:02:00" },
-        ],
-    },
-    {
-        id: "client10",
-        ip: "192.168.1.10",
-        max_bandwidth: 16,
-        data: [
-            { bandwidth: 11, timestamp: "2024-10-19 12:00:00" },
-            { bandwidth: 14, timestamp: "2024-10-19 12:01:00" },
-        ],
-    },
-];
 
 const dummyData_max_bandwidth = [
     {
@@ -226,8 +128,9 @@ const DashboardContent = () => {
     const [chartData, setChartData] = useState([]);
     const fetchData = async () => {
         try {
-            const response = await axios.get("http://localhost:3000/api/all");
-            setClientSummary(response);
+            const response = await axios.get("http://127.0.0.1:5001/api/all");
+            setClientSummary(response.data);
+            console.log("response = ",response.data);
         } catch (error) {
             console.log(error);
         }
@@ -245,9 +148,9 @@ const DashboardContent = () => {
         }
     }
     useEffect(() => {
-        // fetchData();//todo activate this line in ghasi mashine
+        fetchData();//todo activate this line in ghasi mashine
         fetchMaxBandwidth();//todo activate this line in ghasi mashine
-        setClientSummary(dummyData_clientSummary);
+        // setClientSummary(dummyData_clientSummary);
     }, []);
     useEffect(() => {
         if (clientSummary.length > 0) {  // Only calculate if we have data
@@ -272,7 +175,7 @@ const DashboardContent = () => {
                 <Cards
                     title="Peak Usage"
                     unit="Mbps"
-                    amount={peackUsage}
+                    amount={peackUsage.toFixed(2)}
                     description="+50 Mbps from Yesterday"
                     buttonLink="/network_control"
                 />
