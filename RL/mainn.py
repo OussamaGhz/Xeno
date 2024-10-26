@@ -4,10 +4,13 @@ import numpy as np
 import pandas as pd
 from stable_baselines3 import PPO
 from datetime import datetime
+import matplotlib.pyplot as plt
+
 
 class SatelliteBandwidthEnv(gym.Env):
     def __init__(self, data, total_bandwidth=10000, cir=1000):
         super(SatelliteBandwidthEnv, self).__init__()
+        self.reward_history, self.efficiency_history, self.ratio_history = [], [], []
         self.data = data
         self.num_users = 10
         self.total_bandwidth = total_bandwidth
@@ -68,9 +71,38 @@ class SatelliteBandwidthEnv(gym.Env):
         self.state[:, 6] = 0
 
         return self.state
-    import numpy as np
 
     def step(self, action):
+        # Calculate reward, efficiency, and ratio as before
+        reward = self.calculate_reward()
+        efficiency = self.R_efficiency_avg / self.N if self.N > 0 else 0
+        ratio = self.ratio / (self.time_step * self.num_users) if self.time_step > 0 else 0
+        
+        # Store metrics
+        self.reward_history.append(reward)
+        self.efficiency_history.append(efficiency)
+        self.ratio_history.append(ratio)
+
+        # Extract data for the new time step
+        current_data = self.data.iloc[self.time_step * self.num_users:(self.time_step + 1) * self.num_users]
+
+        # Update state with new time slice
+        self.state[:, 0] = current_data['DID'].astype(int).values
+
+        # Convert 'Date' to datetime format if it's in string format
+        if current_data['Date'].dtype == 'object':
+            current_data['Date'] = pd.to_datetime(current_data['Date'])
+        # Extract Unix timestamp directly or use hour for usage patterns
+        self.state[:, 1] = current_data['Date'].apply(lambda x: x.timestamp()).values  # Unix timestamp
+
+        self.state[:, 2] = current_data['BW_REQUESTED'].values
+
+        # Initialize CIR and MIR as before, if needed
+        self.state[:, 3] = np.minimum(self.state[:, 2], self.cir)  # Initial allocation with CIR
+        self.state[:, 4] = self.cir  # CIR for all users
+        self.state[:, 5] = self.cir  # Initial MIR
+        self.state[:, 6] = 0  # Reset Abusive Usage Indicator if necessary
+        
         # Phase 1: Initial Allocation (Ensure Minimum Bandwidth - CIR)
         initial_allocations = np.zeros(self.num_users)
         
@@ -88,12 +120,13 @@ class SatelliteBandwidthEnv(gym.Env):
         # Phase 2: RL Agent Optimizes Remaining Bandwidth by Adjusting MIR
         # Clip the action to be within CIR and the remaining bandwidth limits
         mir_adjustments = np.clip(action, self.state[:, 4], remaining_bandwidth)  # CIR as lower limit
-        # print('MIRRRRRRRRRRRRRRRRRRRRRR : ',mir_adjustments)
 
         # Scale down MIRs if their sum exceeds the remaining bandwidth
         if np.sum(mir_adjustments) > remaining_bandwidth:
             mir_adjustments *= remaining_bandwidth / np.sum(mir_adjustments)
-        # print('MIRRRRRRRRRRRRRRRRRRRRRR 2222222 : ',mir_adjustments)
+
+        # allocated_bandwidth = np.minimum(requested_bandwidths, mirs)
+
 
         # Update MIR in the state after RL agent’s action
         self.state[:, 5] = mir_adjustments  # MIR after RL adjustment
@@ -102,7 +135,6 @@ class SatelliteBandwidthEnv(gym.Env):
         for i in range(self.num_users):
             additional_alloc = min(self.state[i, 2] - initial_allocations[i], mir_adjustments[i] - initial_allocations[i])
             self.state[i, 3] = initial_allocations[i] + max(0, additional_alloc)
-        
         # Ensure total allocation does not exceed 10,000 Kbps
         total_allocated = np.sum(self.state[:, 3])
         if total_allocated > self.total_bandwidth:
@@ -134,7 +166,7 @@ class SatelliteBandwidthEnv(gym.Env):
                 ratio_scores.append(ratioN)
             
             ratioN = np.sum(ratio_scores)
-            print('Sum : ',ratioN)
+            # print('Sum : ',ratioN)
             return ratioN
 
     def calculate_reward(self):
@@ -211,7 +243,7 @@ class SatelliteBandwidthEnv(gym.Env):
 
 
 # Load your test data
-train_df = pd.read_csv('RL/optim_train_set.csv', sep=',')  # Adjust the path as necessary
+train_df = pd.read_csv('optim_train_set.csv', sep=',')  # Adjust the path as necessary
 
 train_df = train_df.sort_values('Date')
 
@@ -219,7 +251,7 @@ train_df = train_df.sort_values('Date')
 test_env = SatelliteBandwidthEnv(data=train_df)
 
 # Load the trained model
-model = PPO.load("RL/ppo_satellite_bandwidth")
+model = PPO.load("ppo_satellite_bandwidth")
 
 # Reset the environment to start a new episode
 obs = test_env.reset(time_step=0)
@@ -230,7 +262,7 @@ print("Training the agent...\n")
 for i in range(1000):  # Change the number of steps if needed
     action, _states = model.predict(obs[:, :5])  # Predict action from the model
     obs, reward, done, info = test_env.step(action)  # Take action in the environment
-    # print(f"Step {i} - Reward: {reward:.2f}")
+    print(f"Step {i} - Reward: {reward:.2f}")
 
     # Check if the episode is done
     if done:
@@ -244,30 +276,41 @@ print("step",test_env.time_step,"num users",test_env.num_users)
 # Calculate and print average ratio
 print("Average Ratio:", test_env.ratio / (test_env.time_step*test_env.num_users))
 
+# Plot reward, efficiency, and ratio
+plt.plot(test_env.reward_history, label="Reward")
+plt.plot(test_env.efficiency_history, label="Efficiency")
+plt.plot(test_env.ratio_history, label="Ratio")
+plt.legend()
+plt.xlabel("Time Steps")
+plt.title("Reward, Efficiency, and Ratio Over Time")
+plt.show()
+
+
 
 
 
 
 
 # Load and preprocess your test data
-test_df = pd.read_csv('RL/test_data.csv', sep=';')  # Use the correct delimiter ';'
+test_df = pd.read_csv('test_data.csv', sep=';')  # Use the correct delimiter ';'
 
 # Convert 'Date' column to datetime and then to Unix timestamp
 test_df['Date'] = pd.to_datetime(test_df['Date'], format='%d/%m/%Y %H:%M')
 test_df = test_df.sort_values('Date')  # Sort by date if necessary
+test_df.to_csv('a.csv',index=False)
 
 # Initialize the testing environment with the processed test dataset
 test_env = SatelliteBandwidthEnv(data=test_df)
 
 # Load the trained model
-model = PPO.load("RL/ppo_satellite_bandwidth")
+model = PPO.load("ppo_satellite_bandwidth")
 
 # Reset the environment to start a new episode
 obs = test_env.reset(time_step=0)
 
 print("Testing the trained agent...\n")
 
-# Run an episode and print rewards for a specified number of steps
+#Run an episode and print rewards for a specified number of steps
 for i in range(1000):  # Adjust number of steps if needed
     action, _states = model.predict(obs[:, :5])  # Predict action from the model
     obs, reward, done, info = test_env.step(action)  # Take action in the environment
@@ -284,3 +327,12 @@ print("Average Efficiency:", test_env.R_efficiency_avg / test_env.N)
 print("step",test_env.time_step,"num users",test_env.num_users)
 # Calculate and print average ratio
 print("Average Ratio:", test_env.ratio / (test_env.time_step*test_env.num_users))
+
+# Plot reward, efficiency, and ratio
+plt.plot(test_env.reward_history, label="Reward")
+plt.plot(test_env.efficiency_history, label="Efficiency")
+plt.plot(test_env.ratio_history, label="Ratio")
+plt.legend()
+plt.xlabel("Time Steps")
+plt.title("Reward, Efficiency, and Ratio Over Time")
+plt.show()
