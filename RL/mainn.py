@@ -30,6 +30,13 @@ class SatelliteBandwidthEnv(gym.Env):
         self.penalty_coefficient_abusive = -0.5
         self.abuse_threshold = 0.2
         self.min_duration = 3
+        self.adaptive_scaling_factor = 1.0
+
+        self.abuse_counters = np.zeros(self.num_users, dtype=int)  # Track abuse counters for each user
+        self.abuse_scores = np.zeros(self.num_users, dtype=int)    # Track cumulative abuse scores for each user
+        self.abusive_penalty_coeff = 5  # Set a penalty coefficient for abusive usage
+        
+
         # Initialize abuse counters
         self.abuse_counters = np.zeros(self.num_users)  # Abuse counters for each user
 
@@ -119,14 +126,11 @@ class SatelliteBandwidthEnv(gym.Env):
         
         # Phase 2: RL Agent Optimizes Remaining Bandwidth by Adjusting MIR
         # Clip the action to be within CIR and the remaining bandwidth limits
-        mir_adjustments = np.clip(action, self.state[:, 4], remaining_bandwidth)  # CIR as lower limit
+        mir_adjustments = np.clip(action, self.state[:, 4], remaining_bandwidth * self.adaptive_scaling_factor)
 
         # Scale down MIRs if their sum exceeds the remaining bandwidth
         if np.sum(mir_adjustments) > remaining_bandwidth:
             mir_adjustments *= remaining_bandwidth / np.sum(mir_adjustments)
-
-        # allocated_bandwidth = np.minimum(requested_bandwidths, mirs)
-
 
         # Update MIR in the state after RL agent’s action
         self.state[:, 5] = mir_adjustments  # MIR after RL adjustment
@@ -135,16 +139,58 @@ class SatelliteBandwidthEnv(gym.Env):
         for i in range(self.num_users):
             additional_alloc = min(self.state[i, 2] - initial_allocations[i], mir_adjustments[i] - initial_allocations[i])
             self.state[i, 3] = initial_allocations[i] + max(0, additional_alloc)
+        
         # Ensure total allocation does not exceed 10,000 Kbps
         total_allocated = np.sum(self.state[:, 3])
         if total_allocated > self.total_bandwidth:
             scaling_factor = self.total_bandwidth / total_allocated
             self.state[:, 3] *= scaling_factor
         
+        # Update adaptive scaling factor based on total allocated bandwidth
+        total_allocated = np.sum(self.state[:, 3])
+        if total_allocated > self.total_bandwidth:
+            # Update scaling factor to avoid over-allocation
+            self.adaptive_scaling_factor = self.total_bandwidth / total_allocated
+            self.state[:, 3] *= self.adaptive_scaling_factor  # Apply scaling to allocated bandwidth
+        else:
+            self.adaptive_scaling_factor = 1.0  # Reset if within limits
+
+        # **Abusive Usage Detection and Management** (Insert this section)
+    
+        # 1. Update Abusive Usage Indicator
+        for i in range(self.num_users):
+            if self.state[i, 2] > self.state[i, 5] * (1 + self.abuse_threshold):  # Abuse condition
+                self.abuse_counters[i] += 1  # Increment abuse counter
+            else:
+                self.abuse_counters[i] = 0  # Reset abuse counter if condition not met
+
+        # 2. Check if abusive episode occurred for any user
+        for i in range(self.num_users):
+            if self.abuse_counters[i] >= self.min_duration:
+                abuse_duration = self.abuse_counters[i] - self.min_duration
+                self.abuse_scores[i] += abuse_duration  # Update abuse score for that user
+
+        # 3. Calculate total abuse score across all users
+        total_abuse_score = np.sum(self.abuse_scores)
+
+        # 4. If total abuse score is 0, ensure no penalties
+        if total_abuse_score == 0:
+            abuse_penalty = 0  # No penalties if there's no abuse
+        else:
+            # Calculate abuse penalty proportional to abuse score
+            abuse_penalty = self.abusive_penalty_coeff * (total_abuse_score / (self.num_users * self.time_step))
+
+        # 5. Dynamically adjust MIR based on abuse score
+        for i in range(self.num_users):
+            if self.abuse_scores[i] > 0:  # If abusive behavior detected, reduce MIR
+                mir_adjustments[i] *= 0.8  # Apply a 20% reduction (or any proportional factor)
+
+        # Reassign updated MIRs back to the state
+        self.state[:, 5] = mir_adjustments
+
         # Calculate the reward and update time step
         reward = self.calculate_reward()
         self.ratio += self.calculate_ratio()
-        # print('users : ',self.ratio)
         self.time_step += 1
         done = self.time_step >= (len(self.data) // self.num_users)
         
@@ -243,11 +289,12 @@ class SatelliteBandwidthEnv(gym.Env):
 
 
 # Load and preprocess your test data
-test_df = pd.read_csv('test_data.csv', sep=',')  # Use the correct delimiter ';'
+test_df = pd.read_csv('optim_train_set.csv', sep=',')  # Use the correct delimiter ';'
 # test_df = pd.read_csv('test_data.csv', sep=';')  # Use the correct delimiter ';'
 
+
 # Convert 'Date' column to datetime and then to Unix timestamp
-test_df['Date'] = pd.to_datetime(test_df['Date'], format='%d/%m/%Y %H:%M')
+test_df['Date'] = pd.to_datetime(test_df['Date'])
 test_df = test_df.sort_values('Date')  # Sort by date if necessary
 
 # Initialize the testing environment with the processed test dataset
