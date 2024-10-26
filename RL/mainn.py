@@ -34,7 +34,7 @@ class SatelliteBandwidthEnv(gym.Env):
         self.abuse_counters = np.zeros(self.num_users)  # Abuse counters for each user
 
         # Define state and action spaces
-        self.state_space = spaces.Box(low=0, high=np.inf, shape=(self.num_users, 7), dtype=np.float32)
+        self.observation_space = spaces.Box(low=0, high=np.inf, shape=(self.num_users, 7), dtype=np.float32)
         self.action_space = spaces.Box(low=cir, high=total_bandwidth, shape=(self.num_users,), dtype=np.float32)
 
     def reset(self, time_step=0):
@@ -239,65 +239,16 @@ class SatelliteBandwidthEnv(gym.Env):
         # Calculate penalty
         P_abusive = self.penalty_coefficient_abusive * (S_total / (self.num_users * total_time_steps))
         return P_abusive
-    
-
-
-# Load your test data
-train_df = pd.read_csv('optim_train_set.csv', sep=',')  # Adjust the path as necessary
-
-train_df = train_df.sort_values('Date')
-
-# Initialize the testing environment with the test dataset
-test_env = SatelliteBandwidthEnv(data=train_df)
-
-# Load the trained model
-model = PPO.load("ppo_satellite_bandwidth")
-
-# Reset the environment to start a new episode
-obs = test_env.reset(time_step=0)
-
-print("Training the agent...\n")
-
-# Run a simple episode and print rewards for a specified number of steps
-for i in range(1000):  # Change the number of steps if needed
-    action, _states = model.predict(obs[:, :5])  # Predict action from the model
-    obs, reward, done, info = test_env.step(action)  # Take action in the environment
-    print(f"Step {i} - Reward: {reward:.2f}")
-
-    # Check if the episode is done
-    if done:
-        print("Episode finished!")
-        break
-
-# Calculate and print average efficiency
-print("Average Efficiency:", test_env.R_efficiency_avg / test_env.N)
-
-print("step",test_env.time_step,"num users",test_env.num_users)
-# Calculate and print average ratio
-print("Average Ratio:", test_env.ratio / (test_env.time_step*test_env.num_users))
-
-# Plot reward, efficiency, and ratio
-plt.plot(test_env.reward_history, label="Reward")
-plt.plot(test_env.efficiency_history, label="Efficiency")
-plt.plot(test_env.ratio_history, label="Ratio")
-plt.legend()
-plt.xlabel("Time Steps")
-plt.title("Reward, Efficiency, and Ratio Over Time")
-plt.show()
-
-
-
-
 
 
 
 # Load and preprocess your test data
-test_df = pd.read_csv('test_data.csv', sep=';')  # Use the correct delimiter ';'
+test_df = pd.read_csv('test_data.csv', sep=',')  # Use the correct delimiter ';'
+# test_df = pd.read_csv('test_data.csv', sep=';')  # Use the correct delimiter ';'
 
 # Convert 'Date' column to datetime and then to Unix timestamp
 test_df['Date'] = pd.to_datetime(test_df['Date'], format='%d/%m/%Y %H:%M')
 test_df = test_df.sort_values('Date')  # Sort by date if necessary
-test_df.to_csv('a.csv',index=False)
 
 # Initialize the testing environment with the processed test dataset
 test_env = SatelliteBandwidthEnv(data=test_df)
@@ -310,11 +261,11 @@ obs = test_env.reset(time_step=0)
 
 print("Testing the trained agent...\n")
 
-#Run an episode and print rewards for a specified number of steps
-for i in range(1000):  # Adjust number of steps if needed
+# Run an episode and print rewards for a specified number of steps
+for i in range(1000):  # Adjust the number of steps if needed
     action, _states = model.predict(obs[:, :5])  # Predict action from the model
     obs, reward, done, info = test_env.step(action)  # Take action in the environment
-    # print(f"Step {i} - Reward: {reward:.2f}")
+    print(f"Step {i} - Reward: {reward:.2f}")
 
     # Check if the episode is done
     if done:
@@ -324,15 +275,15 @@ for i in range(1000):  # Adjust number of steps if needed
 # Calculate and print average efficiency
 print("Average Efficiency:", test_env.R_efficiency_avg / test_env.N)
 
-print("step",test_env.time_step,"num users",test_env.num_users)
 # Calculate and print average ratio
-print("Average Ratio:", test_env.ratio / (test_env.time_step*test_env.num_users))
+print("Average Ratio:", test_env.ratio / (test_env.time_step * test_env.num_users))
 
-# Plot reward, efficiency, and ratio
+
+# Optionally, plot reward, efficiency, and ratio
 plt.plot(test_env.reward_history, label="Reward")
 plt.plot(test_env.efficiency_history, label="Efficiency")
 plt.plot(test_env.ratio_history, label="Ratio")
 plt.legend()
 plt.xlabel("Time Steps")
-plt.title("Reward, Efficiency, and Ratio Over Time")
+plt.title("Training: Reward, Efficiency, and Ratio Over Time")
 plt.show()
