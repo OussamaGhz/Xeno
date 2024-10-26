@@ -2,12 +2,51 @@
 
 ## Table of Contents
 
-1. [Mininet Installation Guide](#mininet-installation-guide)
-2. [Backend Documentation](#backend-documentation)
+1. [RL Documentation](#rl-documentation)
+2. [Mininet Installation Guide](#mininet-installation-guide)
 3. [Frontend Documentation](#frontend-documentation)
 4. [API Documentation](#api-documentation)
 5. [Topology and Simulation Explanation](#topology-and-simulation-explanation)
 6. [Output Data and Command Explanation](#output-data-and-command-explanation)
+
+---
+
+## RL Documentation
+
+### Prerequisites
+
+- **Python 3.7+**: Ensure Python is installed on your system.
+
+### Installation Steps
+
+1. **Navigate to the Backend Directory**:
+    ```bash
+    cd Backend
+    ```
+
+2. **Create a Virtual Environment**:
+    ```bash
+    python -m venv venv
+    ```
+
+3. **Activate the Virtual Environment**:
+    ```bash
+    source venv/bin/activate
+    ```
+
+4. **Install Dependencies**:
+    Install the required Python packages from `requirements.txt`:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+5. **Run the Server**:
+    Start the Flask server using the following command:
+    ```bash
+    sudo python main.py
+    ```
+
+Your backend should now be accessible at `http://localhost:5000`.
 
 ---
 
@@ -83,45 +122,6 @@ If the installation is successful, you should see output indicating that all hos
 
 ---
 
-## Backend Documentation
-
-### Prerequisites
-
-- **Python 3.7+**: Ensure Python is installed on your system.
-
-### Installation Steps
-
-1. **Navigate to the Backend Directory**:
-    ```bash
-    cd Backend
-    ```
-
-2. **Create a Virtual Environment**:
-    ```bash
-    python -m venv venv
-    ```
-
-3. **Activate the Virtual Environment**:
-    ```bash
-    source venv/bin/activate
-    ```
-
-4. **Install Dependencies**:
-    Install the required Python packages from `requirements.txt`:
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-5. **Run the Server**:
-    Start the Flask server using the following command:
-    ```bash
-    sudo python main.py
-    ```
-
-Your backend should now be accessible at `http://localhost:5000`.
-
----
-
 ## Frontend Documentation
 
 ### Prerequisites
@@ -151,7 +151,7 @@ Your frontend should now be accessible at `http://localhost:3000`.
 
 ---
 
-## API Documentation for Bandwidth Management
+## API Documentation
 
 ### Endpoints
 
@@ -303,7 +303,7 @@ Your frontend should now be accessible at `http://localhost:3000`.
     ```json
     {
         "client": "client1",
-        "": "192.168.1.1",
+        "ip": "192.168.1.1",
         "max_bandwidth": 20,
         "highest_bandwidth": 15,
         "latest_bandwidth": 10,
@@ -355,7 +355,7 @@ During the simulation, various log outputs are generated to provide insights int
     ```
     pingall
     ```
-    This indicates that the network connectivity test using [`pingAll`](command:_github.copilot.openSymbolFromReferences?%5B%22%22%2C%5B%7B%22uri%22%3A%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fhome%2Foussama%2Fdbas%2FBackend%2Ftopology.py%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%2C%22pos%22%3A%7B%22line%22%3A101%2C%22character%22%3A8%7D%7D%5D%2C%22a2f00660-d365-4c18-b7b2-048239df0740%22%5D "Go to definition") is being performed to ensure all hosts can communicate with each other.
+    This indicates that the network connectivity test using `pingAll` is being performed to ensure all hosts can communicate with each other.
 
 2. **iperf Results**:
     ```
@@ -363,7 +363,7 @@ During the simulation, various log outputs are generated to provide insights int
     iperf result: [iperf output]
     Bandwidth from client1 to server: 10.0 Mbits/sec at 2024-10-19 12:00:00
     ```
-    This shows the results of the [`iperf`](command:_github.copilot.openSymbolFromReferences?%5B%22%22%2C%5B%7B%22uri%22%3A%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fhome%2Foussama%2Fdbas%2FBackend%2Ftopology.py%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%2C%22pos%22%3A%7B%22line%22%3A103%2C%22character%22%3A12%7D%7D%5D%2C%22a2f00660-d365-4c18-b7b2-048239df0740%22%5D "Go to definition") command, which measures the bandwidth between a client and the server. The bandwidth value and timestamp are logged.
+    This shows the results of the `iperf` command, which measures the bandwidth between a client and the server. The bandwidth value and timestamp are logged.
 
 3. **Changing Bandwidth**:
     ```
@@ -371,16 +371,16 @@ During the simulation, various log outputs are generated to provide insights int
     Configuring bandwidth 10 Mbps for client1-eth0 on client1
     Configuring bandwidth 10 Mbps for router-eth1 on router
     ```
-    This indicates that the bandwidth for a specific client is being changed dynamically. The [`tc`](command:_github.copilot.openSymbolFromReferences?%5B%22%22%2C%5B%7B%22uri%22%3A%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fhome%2Foussama%2Fdbas%2FBackend%2Ftopology.py%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%2C%22pos%22%3A%7B%22line%22%3A143%2C%22character%22%3A45%7D%7D%5D%2C%22a2f00660-d365-4c18-b7b2-048239df0740%22%5D "Go to definition") commands are used to configure the new bandwidth on the specified interfaces.
+    This indicates that the bandwidth for a specific client is being changed dynamically. The `tc` commands are used to configure the new bandwidth on the specified interfaces.
 
 ### Executed Commands
 
 Here are some key commands executed during the simulation and their explanations:
 
 1. **Mininet Commands**:
-    - [`net.pingAll()`](command:_github.copilot.openSymbolFromReferences?%5B%22%22%2C%5B%7B%22uri%22%3A%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fhome%2Foussama%2Fdbas%2FBackend%2Ftopology.py%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%2C%22pos%22%3A%7B%22line%22%3A0%2C%22character%22%3A13%7D%7D%5D%2C%22a2f00660-d365-4c18-b7b2-048239df0740%22%5D "Go to definition"): Tests connectivity between all hosts in the network.
-    - `iperf -s &`: Starts an [`iperf`](command:_github.copilot.openSymbolFromReferences?%5B%22%22%2C%5B%7B%22uri%22%3A%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fhome%2Foussama%2Fdbas%2FBackend%2Ftopology.py%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%2C%22pos%22%3A%7B%22line%22%3A103%2C%22character%22%3A12%7D%7D%5D%2C%22a2f00660-d365-4c18-b7b2-048239df0740%22%5D "Go to definition") server on the server host to listen for traffic.
-    - `iperf -c [server IP] -t 1`: Runs an [`iperf`](command:_github.copilot.openSymbolFromReferences?%5B%22%22%2C%5B%7B%22uri%22%3A%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fhome%2Foussama%2Fdbas%2FBackend%2Ftopology.py%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%2C%22pos%22%3A%7B%22line%22%3A103%2C%22character%22%3A12%7D%7D%5D%2C%22a2f00660-d365-4c18-b7b2-048239df0740%22%5D "Go to definition") client on a client host to measure bandwidth to the server for 1 second.
+    - `net.pingAll()`: Tests connectivity between all hosts in the network.
+    - `iperf -s &`: Starts an `iperf` server on the server host to listen for traffic.
+    - `iperf -c [server IP] -t 1`: Runs an `iperf` client on a client host to measure bandwidth to the server for 1 second.
 
 2. **Traffic Control (tc) Commands**:
     - `tc qdisc del dev [iface] root`: Deletes the existing traffic control configuration on the specified interface.
