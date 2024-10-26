@@ -246,6 +246,21 @@ def get_client_info(client_id):
     return jsonify(data)
 
 
+@app.route("/api/delete_records", methods=["DELETE"])
+def delete_records():
+    timestamp = request.args.get("timestamp")
+    if not timestamp:
+        return jsonify({"status": "error", "message": "Timestamp is required"}), 400
+
+    conn = sqlite3.connect("bandwidth_data.db")
+    c = conn.cursor()
+    c.execute("DELETE FROM bandwidth_data WHERE timestamp = ?", (timestamp,))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"status": "success", "message": f"Records with timestamp {timestamp} deleted"})
+
+
 def run_flask():
     setup_database()  # Ensure the database is set up
     app.run(host="0.0.0.0", port=5000)
