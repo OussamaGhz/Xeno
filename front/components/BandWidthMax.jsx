@@ -27,7 +27,7 @@ const BandwidthMax = ({ currentClient }) => {
         console.log("Current client:", currentClient.clientId);
 
         axios
-            .post(`http://127.0.0.1:5001/api/bandwidth`, {
+            .post(`http://127.0.0.1:5000/api/bandwidth`, {
                 client: `${currentClient.clientId}`,
                 ip: currentClient.ipAddress,
                 bandwidth: bandwidthMax,

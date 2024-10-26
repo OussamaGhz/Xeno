@@ -7,7 +7,7 @@ import ClientsSummary from "@components/ClientsSummary";
 import ProtectedRoute from "@/components/ProtectedRoute"; // Adjust the import path based on your file structure
 import { useEffect, useState } from "react";
 import axios from "axios";
-// import { kMaxLength } from "buffer";
+
 function formatClientDataForChart(clientData) {
     // Find the earliest and latest timestamps
     let timestamps = clientData.flatMap(client => 
@@ -78,89 +78,50 @@ function findPeakBandwidth(clients) {
     };
 }
 
-const dummyData_max_bandwidth = [
-    {
-        "client": "client1",
-        "max_bandwidth": 100.0
-    },
-    {
-        "client": "client2",
-        "max_bandwidth": 150.0
-    },
-    {
-        "client": "client3",
-        "max_bandwidth": 200.0
-    },
-    {
-        "client": "client4",
-        "max_bandwidth": 120.0
-    },
-    {
-        "client": "client5",
-        "max_bandwidth": 180.0
-    },
-    {
-        "client": "client6",
-        "max_bandwidth": 170.0
-    },
-    {
-        "client": "client7",
-        "max_bandwidth": 220.0
-    },
-    {
-        "client": "client8",
-        "max_bandwidth": 90.0
-    },
-    {
-        "client": "client9",
-        "max_bandwidth": 110.0
-    },
-    {
-        "client": "client10",
-        "max_bandwidth": 130.0
-    }
-];
-
 const DashboardContent = () => {
     const [clientSummary, setClientSummary] = useState([]);
     const [peackUsage, setPeackUsage] = useState(0);
     const [maxMir, setMaxMir] = useState(0);
     const [chartData, setChartData] = useState([]);
+    
     const fetchData = async () => {
         try {
-            const response = await axios.get("http://127.0.0.1:5001/api/all");
+            const response = await axios.get("http://127.0.0.1:5000/api/all");
             setClientSummary(response.data);
             console.log("response = ",response.data);
         } catch (error) {
             console.log(error);
         }
     };
-    const  fetchMaxBandwidth = async () => {
+
+    const fetchMaxBandwidth = async () => {
         try {
-            // const response = await axios.get("http://localhost:3000/api/clients/max_bandwidth");
-            const response = dummyData_max_bandwidth;
-            //get the maximum mir from the response
-            let theMax = Math.max(...response.map(max_band_width => max_band_width.max_bandwidth));
-            console.log("theMaxMir",theMax);
+            const response = await fetch("http://localhost:3000/api/clients/max_bandwidth");
+            const data = await response.json();
+            // Get the maximum mir from the response
+            let theMax = Math.max(...data.map(max_band_width => max_band_width.max_bandwidth));
+            console.log("theMaxMir", theMax);
             setMaxMir(theMax);
         } catch (error) {
             console.log(error);
         }
-    }
+    };
+
     useEffect(() => {
-        fetchData();//todo activate this line in ghasi mashine
-        fetchMaxBandwidth();//todo activate this line in ghasi mashine
+        fetchData(); // Activate this line in ghasi machine
+        fetchMaxBandwidth(); // Activate this line in ghasi machine
         // setClientSummary(dummyData_clientSummary);
     }, []);
+
     useEffect(() => {
         if (clientSummary.length > 0) {  // Only calculate if we have data
             setPeackUsage(findPeakBandwidth(clientSummary).totalBandwidth);
-
         }
         let tmp = formatClientDataForChart(clientSummary);
         console.log("tmp=",tmp)
         setChartData(tmp);
     }, [clientSummary]);
+
     return (
         <section className="w-full flex-col flex-center mb-[64px]">
             <NetworkUsage data={clientSummary} title={"Network Usage"} />

@@ -68,7 +68,7 @@ const DashboardContent = () => {
 
     const fetchData = async () => {
         try {
-            const response = await axios.get("http://127.0.0.1:5001/api/all");
+            const response = await axios.get("http://127.0.0.1:5000/api/all");
             setListClients(response.data);
             console.log("response = ", response.data);
         } catch (error) {
@@ -81,7 +81,7 @@ const DashboardContent = () => {
                 return;
             }
             const response = await axios.get(
-                `http://127.0.0.1:5001/api/client/${currentClient.clientId}`,
+                `http://127.0.0.1:5000/api/client/${currentClient.clientId}`,
             );
             console.log("response = ", response.data);
             setClientData(response.data.data);

@@ -12,7 +12,7 @@ const NetworkContent = () => {
     const [clientSummary, setClientSummary] = useState([]);
     const fetchData = async () => {
         try {
-            const response = await axios.get("http://127.0.0.1:5001/api/all");
+            const response = await axios.get("http://127.0.0.1:5000/api/all");
             setClientSummary(response.data);
         } catch (error) {
             console.log(error);
