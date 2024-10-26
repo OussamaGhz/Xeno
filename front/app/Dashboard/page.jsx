@@ -96,7 +96,7 @@ const DashboardContent = () => {
 
     const fetchMaxBandwidth = async () => {
         try {
-            const response = await fetch("http://localhost:3000/api/clients/max_bandwidth");
+            const response = await fetch("http://localhost:5000/api/clients/max_bandwidth");
             const data = await response.json();
             // Get the maximum mir from the response
             let theMax = Math.max(...data.map(max_band_width => max_band_width.max_bandwidth));
