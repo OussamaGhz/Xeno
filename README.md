@@ -4,8 +4,6 @@
 
 1. [RL Documentation](#rl-documentation)
 2. [Mininet Installation Guide](#mininet-installation-guide)
-1. [RL Documentation](#rl-documentation)
-2. [Mininet Installation Guide](#mininet-installation-guide)
 3. [Frontend Documentation](#frontend-documentation)
 4. [API Documentation](#api-documentation)
 5. [Topology and Simulation Explanation](#topology-and-simulation-explanation)
@@ -18,8 +16,7 @@
 ### Prerequisites
 
 - **Python 3.7+**: Ensure Python is installed on your system.
-- **Linux**: Ensure you have a Linux ditro installed in your system.
-
+- **Linux**: Ensure you have a Linux distribution installed on your system.
 
 ### Installation Steps
 
@@ -51,7 +48,7 @@
     ```
 
 6. **Run the RL Model**:
-    Start the Flask server using the following command:
+    Start the RL model using the following command:
     ```bash
     python RL.py
     ```
@@ -161,7 +158,6 @@ Your frontend should now be accessible at `http://localhost:3000`.
 
 ---
 
-## API Documentation
 ## API Documentation
 
 ### Endpoints
@@ -308,7 +304,7 @@ Your frontend should now be accessible at `http://localhost:3000`.
 
 - **URL**: `/client/<client_id>`
 - **Method**: `GET`
-- **Description**: Retrieves detailed information, including IP, max bandwidth, highest bandwidth, and latest bandwidth for a specific client.
+- **Description**: Retrieves detailed information for a specific client, including IP, max bandwidth, highest bandwidth, and latest bandwidth.
 - **Response**:
 
     ```json
